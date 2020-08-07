@@ -1,8 +1,16 @@
 'use strict'
 
 const fs = require("fs");
+const path = require("path");
 
-const data = fs.readFileSync("D:\\Development\\Electron\\Ency2\\AI2.txt");
+let filenameOfDefaultFile = "default_ency.txt";
+const sourcefilenameWithPath = fs.readFileSync(filenameOfDefaultFile).toString().trim();
+const sourcefilename = path.basename(sourcefilenameWithPath)
+
+const data = fs.readFileSync(sourcefilenameWithPath);
+fs.copyFile(sourcefilename, `backup_${sourcefilename}`, (err) => {
+    if (err) throw err;
+  });
 const lines = data.toString().split("\n").filter(line => line !== "");
 const entries = linesToEntries(lines)
 
@@ -76,9 +84,8 @@ function saveAll() {
     for (const term of sortedTerms) {
         totalText = totalText + `${term}: ${entries[term]}\n\n`;
     }
-    fs.writeFile("output.txt", totalText, function (err) {
+    fs.writeFile(sourcefilenameWithPath, totalText, function (err) {
         if (err) alert(err);
-        alert('Saved file');
     });
 }
 

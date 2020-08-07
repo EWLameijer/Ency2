@@ -6,7 +6,9 @@ TODO {
     GOAL: 1) Check whether AI is now correct. If it seems to be, test updating it. => seems okay.
   2) 15-line limit for functions // OK 
   3) create backup of original => IS GOAL! so like "backup.txt"
-  4) when writing, overwrite original
+  4) when writing, overwrite original // done!
+  5) Now also allow loading fresh files...
+  ? allow home button (for @:, for example?)
 
 }
 
