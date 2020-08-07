@@ -1,0 +1,38 @@
+A* search: informed search, that always first expands node with lowest g(n)+h(n) (g(n) being the path cost. Is both complete and optimal, definitely if h(n) is an admissable heuristic.
+
+abstraction: leaving out details that are either irrelevant (or less relevant) to the goal or on too-low level of detail (assumed they can be performed easily)
+	abstractions are valid if their solutions can be mapped to real-world solutions, and useful if they make the problem easier than it was originally.
+
+admissible heuristic: never overestimate the cost to reach the goal (always <= it)
+
+agent function: map of any given percept sequence to an action. CAn be created/modified at three times: at the design phase, at the phase when action takes place, and after the action (learning)
+
+agent program: is NOT the same as the agent function, as the agent program only takes the current percept as input, nog the entire percept sequence/history.
+
+agents: perceive environment through sensors, can act on it through actuators. Usually should be aware of their actions, but cannot necessarily perceive their results.
+	types: simple reflex agent, model-based reflex agents, goal-based agents, utility-based agents.
+
+AI: 
+	2 dimensions: thinking vs acting, and 'like humans' vs rationally.
+	two major challenges: AI worked for simple problems, but large problems required knowledge or were computationally intractable, or both.
+
+algorithm: consider completeness, optimality, time complexity and space complexity.
+
+architecture: (of agent): computer, actuator and sensor, the part that is not program.
+
+b: branching factor in tree search, how many descendants the average node has.
+
+backtracking search: like depth-first search (with a LIFO queue), but only generates one successor node at a time, so space complexity O(m) instead of O(bm).
+
+belief state: set of physical states the world may be in given what the agent knows.
+
+best-first search: informed search, implemented with priority queue. Evaluates node with lowest h(n)
+
+bidirectional search: search from both directions at once. Can be faster than iterative deepening, and is complete and optimalm, but has large space requirements as it requires to keep at least one tree
+	in memory (even if in a hash table for fast lookup). Also hard if there is no explicit set of goal states: In(Bucharest) is easy "checkmate" is not.
+
+blind search: other name for uninformed search.
+
+e: E is an important number in maths.
+
+

@@ -1,0 +1,34 @@
+!TODO
+!DONE
+!IMPORTANT NOTES 
+
+TODO {
+    GOAL: 1) Check whether AI is now correct. If it seems to be, test updating it. => seems okay.
+  2) 15-line limit for functions // OK 
+  3) create backup of original => IS GOAL! so like "backup.txt"
+  4) when writing, overwrite original
+
+}
+
+IMPORTANT NOTES {
+    CRLF: cannot split file on double \n for some reason... Or even double "\r\n\r\n" // 20200807
+    require("fs"); If replaced by ES6-module, does not work anymore for some reason...
+
+}
+
+DONE {
+    1. create a label (or such where the full term is displayed) // DONE 20200805-16:05
+    2. Put the contents of the description in a textbox/textarea // DONE 20200806-08:31
+    2.1: create map to hold all the values.// DONE 20200806-11:44
+    2.2. let the fields be initialized from the entries! 11:45  // DONE 20200806-11:57
+    2.3. See if you can let the desciption be updated... // DONE  20200807-07:19
+    2.4. Always sort the terms in the beginning, so aardbei is before appel...  // DONE  20200807-07:19
+     2.5. Allow adding terms (after enter in ). Or basically whenever text is entered // DONE 20200807-7:30
+    3. investigate how to save the modified data (max 5x15 try/internet, 5x15 read book) // DONE  20200807-07:19
+      GOAL (session1, 20200807-07:47): ai should load AI  DONE 20200807-0749
+    GOAL2 (session1, 20200807-07:47): on term selection, only later terms should be shown below DONE 20200807-0753
+    GOAL3 (session1, 20200807-07:47): find out why critic is independent -> because it has ':'. Change requirement to 'start with tab? or not has ':'?
+    GOAL3 (session1, 20200807-07:47): need bigger window + textarea DONE 20200807-0805
+    GOAL4 (session2): find out how to get newlines in text area. Enter "\n"? Or give it as list of lines? DONE 20200807-0814
+    URGENT: Why doesn't A* search work? => was upper/lowercasesearch.
+}

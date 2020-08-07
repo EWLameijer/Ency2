@@ -1,0 +1,9 @@
+appel: Apfel
+
+aardbei: aardbei
+
+ei: Egg 
+
+peer: nashi
+
+water: l'eau

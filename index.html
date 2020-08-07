@@ -1,0 +1,24 @@
+<!DOCTYPE html> 
+<html> 
+  
+<head> 
+    <title>Encyclopedizer 2.0</title> 
+</head> 
+  
+<body> 
+    <div id=debug></div>
+    <button onclick="saveAll()">Save</button>
+    <br> 
+    <input type="text" name="termBox" id="termEntry" onkeyup="changeTerm()" onkeydown="considerScrolling()">
+    <br>
+    <div id="focusedTerm"></div>
+    <br>
+    <textarea id="description" name="description" rows="15" cols="180" onkeyup="updateDescription()"></textarea>
+    <div id="numEntries"></div>
+    <br>
+    <pre id="output"></pre> 
+      
+    <script src="main.js"></script> 
+</body> 
+  
+</html> 
