@@ -3,17 +3,21 @@
 !IMPORTANT NOTES 
 
 TODO {
-    GOAL: 1) Check whether AI is now correct. If it seems to be, test updating it. => seems okay.
-  2) 15-line limit for functions // OK 
-  3) create backup of original => IS GOAL! so like "backup.txt"
-  4) when writing, overwrite original // done!
-  5) Now also allow loading fresh files...
+  2. bestudeer editen: bv save not tab-targeted? En escape om term te clearen? Of uberhaput om naar term terug te gaan en die te clearen?!
+  1. Allow loading fresh files (and save them in the defaultency).
+  2. what if wantin to add constraint as term when there already is a constraingt satisfaction problem
+  
+ automatically generate default_ency.txt if it does not exist yet, or at least don't crash if it is lacking.
+
+
+
   ? allow home button (for @:, for example?)
 
 }
 
 IMPORTANT NOTES {
     CRLF: cannot split file on double \n for some reason... Or even double "\r\n\r\n" // 20200807
+    declarations: no errors are given if a constant is used before it is declared! So need separate declaration of global variables section at start...
     require("fs"); If replaced by ES6-module, does not work anymore for some reason...
 
 }
@@ -33,4 +37,11 @@ DONE {
     GOAL3 (session1, 20200807-07:47): need bigger window + textarea DONE 20200807-0805
     GOAL4 (session2): find out how to get newlines in text area. Enter "\n"? Or give it as list of lines? DONE 20200807-0814
     URGENT: Why doesn't A* search work? => was upper/lowercasesearch.
+       GOAL: 1) Check whether AI is now correct. If it seems to be, test updating it. => seems okay.
+  2) 15-line limit for functions // OK 
+  3) create backup of original => IS GOAL! so like "backup.txt"
+  4) when writing, overwrite original // done!
+  2. prune enters at the end of items // done!
+  1. start with first entry DONE!
+  
 }

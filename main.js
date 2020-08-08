@@ -10,7 +10,7 @@ const sourcefilename = path.basename(sourcefilenameWithPath)
 const data = fs.readFileSync(sourcefilenameWithPath);
 fs.copyFile(sourcefilename, `backup_${sourcefilename}`, (err) => {
     if (err) throw err;
-  });
+});
 const lines = data.toString().split("\n").filter(line => line !== "");
 const entries = linesToEntries(lines)
 
@@ -20,13 +20,29 @@ const descriptionArea = document.getElementById('description');
 const focusedTermLabel = document.getElementById("focusedTerm");
 const debug = document.getElementById("debug")
 
+const smaller = (a, b) => a < b;
+const larger = (a, b) => a > b;
+const startsWith = (a, b) => a.startsWith(b)
+
+function caseInsensitive(f) {
+    return (a, b) => f(a.toLocaleLowerCase(), b.toLocaleLowerCase());
+}
+
+const caseIndependentSort = (a,b) => a.toLowerCase().localeCompare(b.toLowerCase());
+
+// START THE ACTUAL WORK!
+
 output.innerText = data.toString()
 
 analyze(data.toString())
 
 function analyze(str) {
     document.getElementById("numEntries").innerHTML = Object.keys(entries).length; // may want to update this, but saving is more important!
-    outputField.innerText = Object.keys(entries).join("\n");
+    const keys = Object.keys(entries);
+    outputField.innerText = keys.join("\n");
+    const sortedKeys = keys.sort(caseIndependentSort);
+    const firstTerm = sortedKeys[0];
+    showNewEntry(firstTerm, sortedKeys, true);
 }
 
 function changeTerm() {
@@ -66,23 +82,11 @@ function getTermAndDescription(line) {
     return { term, description };
 }
 
-function caseIndependentSort(a, b) {
-    return a.toLowerCase().localeCompare(b.toLowerCase());
-}
-
-function caseInsensitive(f) {
-    return (a, b) => f(a.toLocaleLowerCase(), b.toLocaleLowerCase());
-}
-
-const smaller = (a, b) => a < b;
-const larger = (a, b) => a > b;
-const startsWith = (a, b) => a.startsWith(b)
-
 function saveAll() {
     const sortedTerms = Object.keys(entries).sort(caseIndependentSort);
     let totalText = ""
     for (const term of sortedTerms) {
-        totalText = totalText + `${term}: ${entries[term]}\n\n`;
+        totalText = totalText + `${term}: ${entries[term].trim()}\n\n`;
     }
     fs.writeFile(sourcefilenameWithPath, totalText, function (err) {
         if (err) alert(err);
@@ -105,7 +109,7 @@ function considerScrolling() {
     }
 }
 
-function showNewEntry(newTerm, sortedKeys, updateTermbox = false ) {
+function showNewEntry(newTerm, sortedKeys, updateTermbox = false) {
     if (updateTermbox) enteredTerm.value = newTerm;
     outputField.innerText = sortedKeys.filter(term => caseInsensitive(larger)(term, newTerm)).join("\n");
     const description = entries[newTerm] ?? "";
