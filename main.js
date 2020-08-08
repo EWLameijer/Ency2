@@ -63,10 +63,15 @@ function analyze(str) {
 }
 
 function changeTerm() {
+    var event = window.event ? window.event : e;
+    const keyCode = event.keyCode;
+    const KEYCODE_ENTER = 13;
     const termGivenByUser = enteredTerm.value;
     const selectedTerms = (termGivenByUser !== "") ? sortedKeys().filter(term => caseInsensitive(startsWith)(term, termGivenByUser)) : [];
-    const firstTerm = (selectedTerms.length > 0) ? selectedTerms[0] : termGivenByUser;
-    showNewEntry(firstTerm);
+    const term = (keyCode === KEYCODE_ENTER || selectedTerms.length === 0) ? termGivenByUser : selectedTerms[0];
+
+    showNewEntry(term);
+    if (keyCode === KEYCODE_ENTER) descriptionArea.focus();
 }
 
 function updateDescription() {
