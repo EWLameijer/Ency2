@@ -18,7 +18,7 @@ const outputField = document.getElementById('output');
 const enteredTerm = document.getElementById('termEntry');
 const descriptionArea = document.getElementById('description');
 const focusedTermLabel = document.getElementById("focusedTerm");
-const debug = document.getElementById("debug")
+// const debug = document.getElementById("debug")
 
 const smaller = (a, b) => a < b;
 const larger = (a, b) => a > b;
@@ -32,6 +32,8 @@ const caseIndependentSort = (a, b) => a.toLowerCase().localeCompare(b.toLowerCas
 
 const sortedKeys = () => Object.keys(entries).sort(caseIndependentSort);
 
+const KEYCODE_HOME = 36;
+
 // adjusted from https://stackoverflow.com/questions/3369593/how-to-detect-escape-key-press-with-pure-js-or-jquery
 document.onkeydown = function (evt) {
     evt = evt || window.event;
@@ -44,17 +46,17 @@ document.onkeydown = function (evt) {
     if (isEscape) {
         showNewEntry("", true);
         enteredTerm.focus();
+    } else if (evt.keyCode === KEYCODE_HOME) {
+        showNewEntry(sortedKeys()[0], true);
     }
 };
 
 // START THE ACTUAL WORK!
 
-output.innerText = data.toString()
 
+analyze();
 
-analyze(data.toString())
-
-function analyze(str) {
+function analyze() {
     document.getElementById("numEntries").innerHTML = Object.keys(entries).length; // may want to update this, but saving is more important!
     const keys = Object.keys(entries);
     outputField.innerText = keys.join("\n");
