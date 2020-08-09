@@ -3,17 +3,11 @@
 !IMPORTANT NOTES 
 
 TODO {
-      ? allow home button (for @:, for example?) 100v 5 m 
-  1. Allow loading fresh files (and save them in the defaultency). 50v/20m
-  2. bestudeer editen: bv save not tab-targeted? 2 v 15 m 
-
-  
- automatically generate default_ency.txt if it does not exist yet, or at least don't crash if it is lacking.
-
-
-
-  
-
+  1. automatically generate default_ency.txt if it does not exist yet, or at least don't crash if it is lacking. 100/10 m
+  1. Allow loading fresh files (and save them in the defaultency); . 50v/20m
+  2. rename entry: 20/40 min 
+  3. bestudeer editen: bv save not tab-targeted? 2 v 15 m 
+  4. possibly refactor to have all function assignments in JS instead of HTML (to make ESlint less troublesome?) 10m vs 20m
 }
 
 IMPORTANT NOTES {
@@ -47,6 +41,8 @@ DONE {
   2. En escape om term te clearen? Of uberhaput om naar term terug te gaan en die te clearen?!
   2. what if wantin to add constraint as term when there already is a constraingt satisfaction problem 500 20 [so when tab-as now to description, when enter: make new description]
    => was actually 13 minutes, not 20.
+   2. ? allow home button (for @:, for example?) 100v 5 m  DONE
+    3. make button for removing bad entries ("game gt") 25/6
 
   
 }

@@ -34,6 +34,18 @@ const sortedKeys = () => Object.keys(entries).sort(caseIndependentSort);
 
 const KEYCODE_HOME = 36;
 
+document.getElementById("removeEntry").onclick = function () {
+    const response = confirm("Remove this entry?");
+    if (response) {
+        const termToRemove = focusedTermLabel.textContent;
+        // try to get the term after it; if that fails (last entry) go to the previous term, else (only entry) clear the field 
+        const replacementTerm = sortedKeys().find(term => caseInsensitive(larger)(term, termToRemove)) ??
+            sortedKeys().reverse().find(term => caseInsensitive(smaller)(term, termToRemove)) ?? "";
+        showNewEntry(replacementTerm, true);
+        delete entries[termToRemove];
+    }
+}
+
 // adjusted from https://stackoverflow.com/questions/3369593/how-to-detect-escape-key-press-with-pure-js-or-jquery
 document.onkeydown = function (evt) {
     evt = evt || window.event;
