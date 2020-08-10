@@ -7,19 +7,7 @@ TIME_SPENT { after each 100: 20 min theory, 10 min explore (Kotlin?) 5 min refle
 
 TODO {
   !! ALWAYS CREATE NEW BRANCH FOR FEATURE 
-  // Ugh... JavaScript ency behaves weirdly, as if the sorting of non-letters fails...
-    Well, there IS a sequencing of letters 
-    const arr = [ '--', ',', '...', '"use strict"', '{}', '&&', '<', '<=', '>', '>=', '||']
-    arr.sort()= [""use strict"", "&&", ",", "--", "...", "<", "<=", ">", ">=", "{}", "||"]
-    const caseIndependentSort = (a, b) => a.toLocaleLowerCase() - b.toLocaleLowerCase();
-    const sortedKeys= arr.sort(caseIndependentSort);
-  // IMPORTANT! <new file> does not seem to work properly when adding entries
-  // Phase 3: when saving, automatically save the filename in the defaultency. If no filename is known, show a save file dialog 
-    => this may be tricky. Try 15 min, then read 15 min electron. Then 15 min other task. Then 15-15-30, 15-15-60, 15-15-120 etc.
-  // 
 
-  1. automatically generate default_ency.txt if it does not exist yet, or at least don't crash if it is lacking. 100/10 m
-  1. Allow loading fresh files (and save them in the defaultency); . 50v/20m
   2. rename entry: 20/40 min 
   3. bestudeer editen: bv save not tab-targeted? 2 v 15 m 
   4. possibly refactor to have all function assignments in JS instead of HTML (to make ESlint less troublesome?) 10m vs 20m
@@ -29,6 +17,8 @@ TODO {
 IMPORTANT NOTES {
     CRLF: cannot split file on double \n for some reason... Or even double "\r\n\r\n" // 20200807
     declarations: no errors are given if a constant is used before it is declared! So need separate declaration of global variables section at start...
+    destructuring declarations: 
+    dialogs: using sync dialogs is easier!
     require("fs"); If replaced by ES6-module, does not work anymore for some reason...
     sorting:  const caseIndependentSort = (a, b) => a.toLowerCase().localeCompare(b.toLowerCase()) does not work well when combine with find... Neither does return aLower.compare(bLower);
 }
@@ -62,6 +52,14 @@ DONE {
     Phase 2: show name (base name) of source file in top of ency 
       // Phase 2: remove possible extension (.txt) from name shown on top of file...20200809
       okay. Phase 1: check the correctness of initializeEntries() for one last time. Then remove the alerts, and commit it. // case 1, 2, 3, 4 5 works.
+  // IMPORTANT! <new file> does not seem to work properly when adding entries
+  // Phase 3: when saving, automatically save the filename in the defaultency. If no filename is known, show a save file dialog 
+    => this may be tricky. Try 15 min, then read 15 min electron. Then 15 min other task. Then 15-15-30, 15-15-60, 15-15-120 etc.
+  // 
+
+  1. automatically generate default_ency.txt if it does not exist yet, or at least don't crash if it is lacking. 100/10 m
+  1. Allow loading fresh files (and save them in the defaultency); . 50v/20m // DONE 20200810
+    
 
   
 }

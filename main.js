@@ -1,4 +1,4 @@
-'use strict'
+"use strict"
 
 const fs = require("fs");
 const path = require("path");
@@ -9,20 +9,20 @@ const NAME_OF_FILE_HOLDING_DEFAULT_ENCY = "default_ency.txt";
 
 function initializeEntries() {
     // case 1: the file containing the name of the default encyclopedia is not found. 
-    if (!fs.existsSync(NAME_OF_FILE_HOLDING_DEFAULT_ENCY)) return { undefined, emptyObject };
+    if (!fs.existsSync(NAME_OF_FILE_HOLDING_DEFAULT_ENCY)) return { sourcefilenameWithPath: undefined, entries: emptyObject };
 
     const sourcefilenameWithPath = fs.readFileSync(NAME_OF_FILE_HOLDING_DEFAULT_ENCY).toString().trim();
     // case 2: the file containing the name of the default encyclopedia is found, but the file is empty
     if (!sourcefilenameWithPath) return { undefined, emptyObject };
 
     // case 3: the filename found does not point to an existing file.
-    if (!fs.existsSync(sourcefilenameWithPath)) return { undefined, emptyObject };
+    if (!fs.existsSync(sourcefilenameWithPath)) return { sourcefilenameWithPath: undefined, entries: emptyObject };
 
     const sourcefilename = path.basename(sourcefilenameWithPath);
     const data = fs.readFileSync(sourcefilenameWithPath);
 
     // case 4: the file is empty. 
-    if (!data || data.toString().trim() === "") return { sourcefilenameWithPath, emptyObject };
+    if (!data || data.toString().trim() === "") return { sourcefilenameWithPath, entries: emptyObject };
     fs.copyFile(sourcefilenameWithPath, `backup_${sourcefilename}`, (err) => {
         if (err) alert(`Error '${err} while making backup.`);
     });
@@ -49,8 +49,6 @@ function loadFile(fileNameWithPath) {
     document.title = `Encyclopedizer 2.0 - ${fileNameToDisplay}`;
     return linesToEntries(lines);
 }
-
-
 
 const outputField = document.getElementById('output');
 const enteredTerm = document.getElementById('termEntry');
@@ -206,10 +204,11 @@ let loadOptions = {
 //Synchronous
 
 function saveAll() {
-    /*alert('trying to save')
-    let filename = dialog.showSaveDialog(WIN, options); // WORKS IF AI-FILE LOADED
-    // 
-console.log(filename);*/
+    if (!sourcefilenameWithPath) {
+        sourcefilenameWithPath = dialog.showSaveDialogSync(WIN, saveOptions); // WORKS IF AI-FILE LOADED
+        const fileNameToDisplay = (sourcefilenameWithPath) ? path.parse(sourcefilenameWithPath).name : "<new file>";
+        document.title = `Encyclopedizer 2.0 - ${fileNameToDisplay}`;
+    }
     const sortedTerms = Object.keys(entries).sort(caseIndependentSort);
     let totalText = ""
     for (const term of sortedTerms) {
