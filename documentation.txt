@@ -3,11 +3,17 @@
 !IMPORTANT NOTES 
 
 TODO {
+  // okay. Phase 1: check the correctness of initializeEntries() for one last time. Then remove the alerts, and commit it. // case 1, 2, 3, 4 5 works.
+  // Phase 3: when saving, automatically save the filename in the defaultency. If no filename is known, show a save file dialog 
+    => this may be tricky. Try 15 min, then read 15 min electron. Then 15 min other task. Then 15-15-30, 15-15-60, 15-15-120 etc.
+  // 
+
   1. automatically generate default_ency.txt if it does not exist yet, or at least don't crash if it is lacking. 100/10 m
   1. Allow loading fresh files (and save them in the defaultency); . 50v/20m
   2. rename entry: 20/40 min 
   3. bestudeer editen: bv save not tab-targeted? 2 v 15 m 
   4. possibly refactor to have all function assignments in JS instead of HTML (to make ESlint less troublesome?) 10m vs 20m
+  5. Make a nicer readme.md; 
 }
 
 IMPORTANT NOTES {
@@ -43,6 +49,8 @@ DONE {
    => was actually 13 minutes, not 20.
    2. ? allow home button (for @:, for example?) 100v 5 m  DONE
     3. make button for removing bad entries ("game gt") 25/6
+    Phase 2: show name (base name) of source file in top of ency 
+      // Phase 2: remove possible extension (.txt) from name shown on top of file...20200809
 
   
 }

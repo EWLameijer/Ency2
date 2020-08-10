@@ -3,16 +3,49 @@
 const fs = require("fs");
 const path = require("path");
 
-let filenameOfDefaultFile = "default_ency.txt";
-const sourcefilenameWithPath = fs.readFileSync(filenameOfDefaultFile).toString().trim();
-const sourcefilename = path.basename(sourcefilenameWithPath)
+const emptyObject = {}
 
-const data = fs.readFileSync(sourcefilenameWithPath);
-fs.copyFile(sourcefilename, `backup_${sourcefilename}`, (err) => {
-    if (err) throw err;
-});
-const lines = data.toString().split("\n").filter(line => line !== "");
-const entries = linesToEntries(lines)
+const NAME_OF_FILE_HOLDING_DEFAULT_ENCY = "default_ency.txt"; // should be default_ency.txt
+
+function initializeEntries() {
+    // case 1: the file containing the name of the default encyclopedia is not found. //alert(`check 1`);
+    //alert(`check 1`);
+    if (!fs.existsSync(NAME_OF_FILE_HOLDING_DEFAULT_ENCY)) return { undefined, emptyObject };
+
+    const sourcefilenameWithPath = fs.readFileSync(NAME_OF_FILE_HOLDING_DEFAULT_ENCY).toString().trim();
+    //alert(`check 2 '${sourcefilenameWithPath}'`);
+    // case 2: the file containing the name of the default encyclopedia is found, but the file is empty
+    if (!sourcefilenameWithPath) return { undefined, emptyObject };
+    alert(`check 3 '${sourcefilenameWithPath}'`); // works until here 
+    //let sourcefilename = "";
+
+    // case 3: the filename found does not point to an existing file.
+    if (!fs.existsSync(sourcefilenameWithPath)) return { undefined, emptyObject };
+    alert(`check 4 '${sourcefilenameWithPath}''`);
+
+    const sourcefilename = path.basename(sourcefilenameWithPath);
+    alert(`check 4b '${sourcefilename}''`);
+
+    const data = fs.readFileSync(sourcefilenameWithPath);
+    alert(`check 5 '${sourcefilenameWithPath}'data='${data.toString()}'`);
+
+    // case 4: the file is empty. 
+    if (!data || data.toString().trim() === "") return { sourcefilenameWithPath, emptyObject };
+    alert(`check 6 '${sourcefilenameWithPath}''${data.toString()}'`);
+    fs.copyFile(sourcefilenameWithPath, `backup_${sourcefilename}`, (err) => {
+        if (err) alert(`Error '${err} while making backup.`);
+    });
+    const lines = data.toString().split("\n").filter(line => line !== "");
+    alert(`check 7, firstLine is '${lines[0]}'`);
+    const entries = linesToEntries(lines);
+    alert(`check 8, first entry is '${entries}'`);
+    return { sourcefilenameWithPath, entries };
+}
+
+const { sourcefilenameWithPath, entries } = initializeEntries();
+const fileNameToDisplay = (sourcefilenameWithPath) ? path.parse(sourcefilenameWithPath).name : "<new file>";
+document.title = `Encyclopedizer 2.0 - ${fileNameToDisplay}`;
+
 
 const outputField = document.getElementById('output');
 const enteredTerm = document.getElementById('termEntry');
@@ -72,7 +105,7 @@ function analyze() {
     document.getElementById("numEntries").innerHTML = Object.keys(entries).length; // may want to update this, but saving is more important!
     const keys = Object.keys(entries);
     outputField.innerText = keys.join("\n");
-    const firstTerm = sortedKeys()[0];
+    const firstTerm = sortedKeys()[0] ?? "";
     showNewEntry(firstTerm, true);
 }
 
@@ -117,13 +150,38 @@ function getTermAndDescription(line) {
     return { term, description };
 }
 
+
+// from https://www.brainbell.com/javascript/show-save-dialog.html
+const { remote } = require('electron'),
+    dialog = remote.dialog,
+    WIN = remote.getCurrentWindow();
+
+let options = {
+    //Placeholder 1
+    title: "Save file - Electron example",
+
+    //Placeholder 4
+    buttonLabel: "Save Encyclopedia",
+
+    //Placeholder 3
+    filters: [
+        { name: 'Text files', extensions: ['txt'] },
+        { name: 'All Files', extensions: ['*'] }
+    ]
+}
+
 function saveAll() {
+    let filename = dialog.showSaveDialog(WIN, options)
+    console.log(filename)
     const sortedTerms = Object.keys(entries).sort(caseIndependentSort);
     let totalText = ""
     for (const term of sortedTerms) {
         totalText = totalText + `${term}: ${entries[term].trim()}\n\n`;
     }
-    fs.writeFile(sourcefilenameWithPath, totalText, function (err) {
+    fs.writeFile(sourceFile, totalText, function (err) {
+        if (err) alert(err);
+    });
+    fs.writeFile(NAME_OF_FILE_HOLDING_DEFAULT_ENCY, sourceFile, function (err) {
         if (err) alert(err);
     });
 }
