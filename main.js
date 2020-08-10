@@ -168,20 +168,37 @@ const { remote } = require('electron'),
     dialog = remote.dialog,
     WIN = remote.getCurrentWindow();
 
-let options = {
+let saveOptions = {
     //Placeholder 1
-    title: "Save file - Electron example",
+    title: "Save Encyclopedia",
 
     //Placeholder 2
     defaultPath: "D:\\Google Drive\\Job\\work_documents",
 
     //Placeholder 4
-    buttonLabel: "Save Electron File",
+    buttonLabel: "Save File",
 
     //Placeholder 3
     filters: [
         { name: 'Text Files', extensions: ['txt'] },
-        { name: 'Custom File Type', extensions: ['as'] },
+        { name: 'All Files', extensions: ['*'] }
+    ]
+}
+
+
+let loadOptions = {
+    //Placeholder 1
+    title: "Load Encyclopedia",
+
+    //Placeholder 2
+    defaultPath: "D:\\Google Drive\\Job\\work_documents",
+
+    //Placeholder 4
+    buttonLabel: "Load File",
+
+    //Placeholder 3
+    filters: [
+        { name: 'Text Files', extensions: ['txt'] },
         { name: 'All Files', extensions: ['*'] }
     ]
 }
@@ -213,11 +230,9 @@ function considerScrolling() {
     const KEYCODE_UP = 38;
     const selectedTerm = focusedTermLabel.textContent ?? "";
     if (keyCode === KEYCODE_DOWN) {
-        //alert(`sortedKeys: ${sortedKeys()}`); // this is what one would expect 
         const newTerm = sortedKeys().find(term => caseInsensitive(larger)(term, selectedTerm));
         if (newTerm) showNewEntry(newTerm, true);
     } else if (keyCode === KEYCODE_UP) {
-        //alert(`sortedKeys: ${sortedKeys()}`);
         const newTerm = sortedKeys().reverse().find(term => caseInsensitive(smaller)(term, selectedTerm));
         if (newTerm) showNewEntry(newTerm, true);
     }
@@ -231,19 +246,13 @@ function showNewEntry(newTerm, updateTermbox = false) {
     descriptionArea.value = description;
 }
 
-document.getElementById("loadEncy").onclick = function openSomething() {
-    //alert("Trying to load!");
-    let newFilename = dialog.showOpenDialogSync(WIN, options);
-    //alert(`fileName = '${(newFilename) ? (newFilename[0]) : "unknown>" }'`);
+document.getElementById("loadEncy").onclick = function() {
+    let newFilename = dialog.showOpenDialogSync(WIN, loadOptions);
     if (newFilename) {
-        //alert(`trying to load`);
         sourcefilenameWithPath = newFilename[0];
         entries = loadFile(sourcefilenameWithPath);
-        //alert(`loaded`);
         analyze();
-    } else {
-        alert('Some error');
-    }
+    } 
 }
 
 
