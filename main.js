@@ -5,40 +5,31 @@ const path = require("path");
 
 const emptyObject = {}
 
-const NAME_OF_FILE_HOLDING_DEFAULT_ENCY = "default_ency.txt"; // should be default_ency.txt
+const NAME_OF_FILE_HOLDING_DEFAULT_ENCY = "default_ency.txt"; 
 
 function initializeEntries() {
-    // case 1: the file containing the name of the default encyclopedia is not found. //alert(`check 1`);
-    //alert(`check 1`);
+    // case 1: the file containing the name of the default encyclopedia is not found. 
     if (!fs.existsSync(NAME_OF_FILE_HOLDING_DEFAULT_ENCY)) return { undefined, emptyObject };
 
     const sourcefilenameWithPath = fs.readFileSync(NAME_OF_FILE_HOLDING_DEFAULT_ENCY).toString().trim();
-    //alert(`check 2 '${sourcefilenameWithPath}'`);
     // case 2: the file containing the name of the default encyclopedia is found, but the file is empty
     if (!sourcefilenameWithPath) return { undefined, emptyObject };
-    alert(`check 3 '${sourcefilenameWithPath}'`); // works until here 
-    //let sourcefilename = "";
 
     // case 3: the filename found does not point to an existing file.
     if (!fs.existsSync(sourcefilenameWithPath)) return { undefined, emptyObject };
-    alert(`check 4 '${sourcefilenameWithPath}''`);
 
     const sourcefilename = path.basename(sourcefilenameWithPath);
-    alert(`check 4b '${sourcefilename}''`);
-
     const data = fs.readFileSync(sourcefilenameWithPath);
-    alert(`check 5 '${sourcefilenameWithPath}'data='${data.toString()}'`);
 
     // case 4: the file is empty. 
     if (!data || data.toString().trim() === "") return { sourcefilenameWithPath, emptyObject };
-    alert(`check 6 '${sourcefilenameWithPath}''${data.toString()}'`);
     fs.copyFile(sourcefilenameWithPath, `backup_${sourcefilename}`, (err) => {
         if (err) alert(`Error '${err} while making backup.`);
     });
     const lines = data.toString().split("\n").filter(line => line !== "");
-    alert(`check 7, firstLine is '${lines[0]}'`);
     const entries = linesToEntries(lines);
-    alert(`check 8, first entry is '${entries}'`);
+
+    // case 5: the file has contents, so a true encyclopedia can be loaded.
     return { sourcefilenameWithPath, entries };
 }
 
