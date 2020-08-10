@@ -2,8 +2,18 @@
 !DONE
 !IMPORTANT NOTES 
 
+TIME_SPENT { after each 100: 20 min theory, 10 min explore (Kotlin?) 5 min reflect}
+20200810:19:03-
+
 TODO {
-  // okay. Phase 1: check the correctness of initializeEntries() for one last time. Then remove the alerts, and commit it. // case 1, 2, 3, 4 5 works.
+  !! ALWAYS CREATE NEW BRANCH FOR FEATURE 
+  // Ugh... JavaScript ency behaves weirdly, as if the sorting of non-letters fails...
+    Well, there IS a sequencing of letters 
+    const arr = [ '--', ',', '...', '"use strict"', '{}', '&&', '<', '<=', '>', '>=', '||']
+    arr.sort()= [""use strict"", "&&", ",", "--", "...", "<", "<=", ">", ">=", "{}", "||"]
+    const caseIndependentSort = (a, b) => a.toLocaleLowerCase() - b.toLocaleLowerCase();
+    const sortedKeys= arr.sort(caseIndependentSort);
+  // IMPORTANT! <new file> does not seem to work properly when adding entries
   // Phase 3: when saving, automatically save the filename in the defaultency. If no filename is known, show a save file dialog 
     => this may be tricky. Try 15 min, then read 15 min electron. Then 15 min other task. Then 15-15-30, 15-15-60, 15-15-120 etc.
   // 
@@ -20,7 +30,7 @@ IMPORTANT NOTES {
     CRLF: cannot split file on double \n for some reason... Or even double "\r\n\r\n" // 20200807
     declarations: no errors are given if a constant is used before it is declared! So need separate declaration of global variables section at start...
     require("fs"); If replaced by ES6-module, does not work anymore for some reason...
-
+    sorting:  const caseIndependentSort = (a, b) => a.toLowerCase().localeCompare(b.toLowerCase()) does not work well when combine with find... Neither does return aLower.compare(bLower);
 }
 
 DONE {
@@ -51,6 +61,7 @@ DONE {
     3. make button for removing bad entries ("game gt") 25/6
     Phase 2: show name (base name) of source file in top of ency 
       // Phase 2: remove possible extension (.txt) from name shown on top of file...20200809
+      okay. Phase 1: check the correctness of initializeEntries() for one last time. Then remove the alerts, and commit it. // case 1, 2, 3, 4 5 works.
 
   
 }

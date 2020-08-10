@@ -5,7 +5,7 @@ const path = require("path");
 
 const emptyObject = {}
 
-const NAME_OF_FILE_HOLDING_DEFAULT_ENCY = "default_ency.txt"; 
+const NAME_OF_FILE_HOLDING_DEFAULT_ENCY = "default_ency.txt";
 
 function initializeEntries() {
     // case 1: the file containing the name of the default encyclopedia is not found. 
@@ -33,15 +33,30 @@ function initializeEntries() {
     return { sourcefilenameWithPath, entries };
 }
 
-const { sourcefilenameWithPath, entries } = initializeEntries();
+let { sourcefilenameWithPath, entries } = initializeEntries();
 const fileNameToDisplay = (sourcefilenameWithPath) ? path.parse(sourcefilenameWithPath).name : "<new file>";
 document.title = `Encyclopedizer 2.0 - ${fileNameToDisplay}`;
+
+function loadFile(fileNameWithPath) {
+    const sourcefilename = path.basename(fileNameWithPath);
+    const data = fs.readFileSync(fileNameWithPath);
+    if (!data || data.toString().trim() === "") return emptyObject;
+    fs.copyFile(sourcefilenameWithPath, `backup_${sourcefilename}`, (err) => {
+        if (err) alert(`Error '${err} while making backup.`);
+    });
+    const lines = data.toString().split("\n").filter(line => line !== "");
+    const fileNameToDisplay = (sourcefilenameWithPath) ? path.parse(sourcefilenameWithPath).name : "<new file>";
+    document.title = `Encyclopedizer 2.0 - ${fileNameToDisplay}`;
+    return linesToEntries(lines);
+}
+
 
 
 const outputField = document.getElementById('output');
 const enteredTerm = document.getElementById('termEntry');
 const descriptionArea = document.getElementById('description');
 const focusedTermLabel = document.getElementById("focusedTerm");
+
 // const debug = document.getElementById("debug")
 
 const smaller = (a, b) => a < b;
@@ -52,7 +67,13 @@ function caseInsensitive(f) {
     return (a, b) => f(a.toLocaleLowerCase(), b.toLocaleLowerCase());
 }
 
-const caseIndependentSort = (a, b) => a.toLowerCase().localeCompare(b.toLowerCase());
+function caseIndependentSort(a, b) {
+    const aLower = a.toLocaleLowerCase();
+    const bLower = b.toLocaleLowerCase();
+    if (aLower < bLower) return -1;
+    else if (aLower == bLower) return 0;
+    else return 1;
+}
 
 const sortedKeys = () => Object.keys(entries).sort(caseIndependentSort);
 
@@ -136,7 +157,7 @@ function linesToEntries(lines) {
 
 function getTermAndDescription(line) {
     const colonPosition = line.indexOf(":");
-    const term = line.slice(0, colonPosition);
+    const term = line.slice(0, colonPosition).trim();
     const description = line.substring(colonPosition + 1).trim();
     return { term, description };
 }
@@ -151,28 +172,36 @@ let options = {
     //Placeholder 1
     title: "Save file - Electron example",
 
+    //Placeholder 2
+    defaultPath: "D:\\Google Drive\\Job\\work_documents",
+
     //Placeholder 4
-    buttonLabel: "Save Encyclopedia",
+    buttonLabel: "Save Electron File",
 
     //Placeholder 3
     filters: [
-        { name: 'Text files', extensions: ['txt'] },
+        { name: 'Text Files', extensions: ['txt'] },
+        { name: 'Custom File Type', extensions: ['as'] },
         { name: 'All Files', extensions: ['*'] }
     ]
 }
 
+//Synchronous
+
 function saveAll() {
-    let filename = dialog.showSaveDialog(WIN, options)
-    console.log(filename)
+    /*alert('trying to save')
+    let filename = dialog.showSaveDialog(WIN, options); // WORKS IF AI-FILE LOADED
+    // 
+console.log(filename);*/
     const sortedTerms = Object.keys(entries).sort(caseIndependentSort);
     let totalText = ""
     for (const term of sortedTerms) {
         totalText = totalText + `${term}: ${entries[term].trim()}\n\n`;
     }
-    fs.writeFile(sourceFile, totalText, function (err) {
+    fs.writeFile(sourcefilenameWithPath, totalText, function (err) {
         if (err) alert(err);
     });
-    fs.writeFile(NAME_OF_FILE_HOLDING_DEFAULT_ENCY, sourceFile, function (err) {
+    fs.writeFile(NAME_OF_FILE_HOLDING_DEFAULT_ENCY, sourcefilenameWithPath, function (err) {
         if (err) alert(err);
     });
 }
@@ -184,9 +213,11 @@ function considerScrolling() {
     const KEYCODE_UP = 38;
     const selectedTerm = focusedTermLabel.textContent ?? "";
     if (keyCode === KEYCODE_DOWN) {
+        //alert(`sortedKeys: ${sortedKeys()}`); // this is what one would expect 
         const newTerm = sortedKeys().find(term => caseInsensitive(larger)(term, selectedTerm));
         if (newTerm) showNewEntry(newTerm, true);
     } else if (keyCode === KEYCODE_UP) {
+        //alert(`sortedKeys: ${sortedKeys()}`);
         const newTerm = sortedKeys().reverse().find(term => caseInsensitive(smaller)(term, selectedTerm));
         if (newTerm) showNewEntry(newTerm, true);
     }
@@ -199,4 +230,20 @@ function showNewEntry(newTerm, updateTermbox = false) {
     focusedTermLabel.innerHTML = `<i>${newTerm}</i>`;
     descriptionArea.value = description;
 }
+
+document.getElementById("loadEncy").onclick = function openSomething() {
+    //alert("Trying to load!");
+    let newFilename = dialog.showOpenDialogSync(WIN, options);
+    //alert(`fileName = '${(newFilename) ? (newFilename[0]) : "unknown>" }'`);
+    if (newFilename) {
+        //alert(`trying to load`);
+        sourcefilenameWithPath = newFilename[0];
+        entries = loadFile(sourcefilenameWithPath);
+        //alert(`loaded`);
+        analyze();
+    } else {
+        alert('Some error');
+    }
+}
+
 
