@@ -3,7 +3,7 @@
 !IMPORTANT NOTES 
 
 TIME_SPENT { after each 100: 20 min theory, 10 min explore (Kotlin?) 5 min reflect}
-20200810:19:03-
+20200810:19:03-20:12=69 min
 
 TODO {
   !! ALWAYS CREATE NEW BRANCH FOR FEATURE 
@@ -12,6 +12,8 @@ TODO {
   3. bestudeer editen: bv save not tab-targeted? 2 v 15 m 
   4. possibly refactor to have all function assignments in JS instead of HTML (to make ESlint less troublesome?) 10m vs 20m
   5. Make a nicer readme.md; 
+
+  Create dropdownbox to list multiple encys, also adjust the file-file to have multiple lines, with the most recent one first.
 }
 
 IMPORTANT NOTES {
