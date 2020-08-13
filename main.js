@@ -5,13 +5,18 @@ const path = require("path");
 
 const emptyObject = {}
 
-const NAME_OF_FILE_HOLDING_DEFAULT_ENCY = "default_ency.txt";
+const NAME_OF_FILE_HOLDING_DEFAULT_ENCY = "default_ency2.txt";
 
+
+// next phase: return ALL sourcefilenames; after all the chosen one is the first one 
+// THEN make a dropdown-box with the abbreviated names (map name->abbreviated name)
 function initializeEntries() {
     // case 1: the file containing the name of the default encyclopedia is not found. 
     if (!fs.existsSync(NAME_OF_FILE_HOLDING_DEFAULT_ENCY)) return { sourcefilenameWithPath: undefined, entries: emptyObject };
 
-    const sourcefilenameWithPath = fs.readFileSync(NAME_OF_FILE_HOLDING_DEFAULT_ENCY).toString().trim();
+    const allSourceFileNames = fs.readFileSync(NAME_OF_FILE_HOLDING_DEFAULT_ENCY).toString().split("\n").map(str => str.trim());
+    const sourcefilenameWithPath = allSourceFileNames[0];
+    alert(`filenames found: '${sourcefilenameWithPath}'/'${allSourceFileNames}'`);
     // case 2: the file containing the name of the default encyclopedia is found, but the file is empty
     if (!sourcefilenameWithPath) return { undefined, emptyObject };
 
@@ -245,13 +250,13 @@ function showNewEntry(newTerm, updateTermbox = false) {
     descriptionArea.value = description;
 }
 
-document.getElementById("loadEncy").onclick = function() {
+document.getElementById("loadEncy").onclick = function () {
     let newFilename = dialog.showOpenDialogSync(WIN, loadOptions);
     if (newFilename) {
         sourcefilenameWithPath = newFilename[0];
         entries = loadFile(sourcefilenameWithPath);
         analyze();
-    } 
+    }
 }
 
 

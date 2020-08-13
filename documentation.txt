@@ -7,8 +7,9 @@ TIME_SPENT { after each 100: 20 min theory, 10 min explore (Kotlin?) 5 min refle
 
 TODO {
   !! ALWAYS CREATE NEW BRANCH FOR FEATURE 
+  !Scale size of text area  to size of screen...
 
-  2. rename entry: 20/40 min 
+  2. rename entry: 20/40 min !!! String.fromCharCode
   3. bestudeer editen: bv save not tab-targeted? 2 v 15 m 
   4. possibly refactor to have all function assignments in JS instead of HTML (to make ESlint less troublesome?) 10m vs 20m
   5. Make a nicer readme.md; 
