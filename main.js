@@ -7,58 +7,83 @@ const emptyObject = {}
 
 const NAME_OF_FILE_HOLDING_DEFAULT_ENCY = "default_ency2.txt";
 
+const outputField = document.getElementById('output');
+const enteredTerm = document.getElementById('termEntry');
+const descriptionArea = document.getElementById('description');
+const focusedTermLabel = document.getElementById("focusedTerm");
+const fileSelector = document.getElementById("fileList");
 
-// next phase: return ALL sourcefilenames; after all the chosen one is the first one 
-// THEN make a dropdown-box with the abbreviated names (map name->abbreviated name)
 function initializeEntries() {
     // case 1: the file containing the name of the default encyclopedia is not found. 
-    if (!fs.existsSync(NAME_OF_FILE_HOLDING_DEFAULT_ENCY)) return { sourcefilenames: undefined, entries: emptyObject };
+    const failedReading = { sourcefilenames: undefined, entries: emptyObject };
+    if (!fs.existsSync(NAME_OF_FILE_HOLDING_DEFAULT_ENCY)) return failedReading;
 
     const sourcefilenames = fs.readFileSync(NAME_OF_FILE_HOLDING_DEFAULT_ENCY).toString().split("\n").map(str => str.trim());
-    let latestSourcefilenameWithPath = sourcefilenames[0];
-    alert(`filenames found: '${latestSourcefilenameWithPath}'/'${sourcefilenames}'`);
+    alert(`filenames found: '${sourcefilenames}'`);
     // case 2: the file containing the name of the default encyclopedia is found, but the file is empty
-    if (!latestSourcefilenameWithPath) return { undefined, emptyObject };
+    if (sourcefilenames == "") {
+        alert("No files found!")
+        return failedReading;
+    }
 
     // case 3: the filename found does not point to an existing file: loop over the names, trying to find one that works 
-    if (!fs.existsSync(sourcefilenameWithPath)) return { sourcefilenames: undefined, entries: emptyObject };
+    let namesOfExistingFiles = [];
+    for (const filename of sourcefilenames) {
+        if (fs.existsSync(filename)) namesOfExistingFiles.push(filename)
+    }
+    alert(`files known: ${namesOfExistingFiles}`);
+    if (namesOfExistingFiles.length == 0) return failedReading;
 
-    const sourcefilename = path.basename(sourcefilenameWithPath);
-    const data = fs.readFileSync(sourcefilenameWithPath);
+    const firstFile = namesOfExistingFiles[0];
+    const sourcefilename = path.basename(firstFile);
+    const data = fs.readFileSync(firstFile);
 
     // case 4: the file is empty. 
-    if (!data || data.toString().trim() === "") return { sourcefilenamesWithPath, entries: emptyObject };
-    fs.copyFile(sourcefilenameWithPath, `backup_${sourcefilename}`, (err) => {
+    if (!data || data.toString().trim() === "") return { sourcefilenames, entries: emptyObject };
+    fs.copyFile(firstFile, `backup_${sourcefilename}`, (err) => {
         if (err) alert(`Error '${err} while making backup.`);
     });
     const lines = data.toString().split("\n").filter(line => line !== "");
     const entries = linesToEntries(lines);
 
     // case 5: the file has contents, so a true encyclopedia can be loaded.
-    return { sourcefilenameWithPath, entries };
+    return { sourcefilenames, entries };
 }
 
 let { sourcefilenames, entries } = initializeEntries();
-const fileNameToDisplay = (sourcefilenameWithPath) ? path.parse(sourcefilenamesWithPath).name : "<new file>";
+let nameOfCurrentFile = sourcefilenames[0];
+const fileNameToDisplay = (nameOfCurrentFile) ? path.parse(nameOfCurrentFile).name : "<new file>";
 document.title = `Encyclopedizer 2.0 - ${fileNameToDisplay}`;
+fillFileSelector();
 
 function loadFile(fileNameWithPath) {
     const sourcefilename = path.basename(fileNameWithPath);
     const data = fs.readFileSync(fileNameWithPath);
     if (!data || data.toString().trim() === "") return emptyObject;
-    fs.copyFile(sourcefilenameWithPath, `backup_${sourcefilename}`, (err) => {
+    fs.copyFile(fileNameWithPath, `backup_${sourcefilename}`, (err) => {
         if (err) alert(`Error '${err} while making backup.`);
     });
     const lines = data.toString().split("\n").filter(line => line !== "");
-    const fileNameToDisplay = (sourcefilenameWithPath) ? path.parse(sourcefilenameWithPath).name : "<new file>";
+    const fileNameToDisplay = (fileNameWithPath) ? path.parse(fileNameWithPath).name : "<new file>";
     document.title = `Encyclopedizer 2.0 - ${fileNameToDisplay}`;
     return linesToEntries(lines);
 }
 
-const outputField = document.getElementById('output');
-const enteredTerm = document.getElementById('termEntry');
-const descriptionArea = document.getElementById('description');
-const focusedTermLabel = document.getElementById("focusedTerm");
+fileSelector.onchange= function() {
+    saveAll()
+    entries = loadFile(fileSelector.value);
+    nameOfCurrentFile = fileSelector.value;
+    analyze();
+}
+
+function fillFileSelector() {
+    for (const filename of sourcefilenames) {
+        const opt = document.createElement("option");
+        opt.value = filename;
+        opt.innerHTML = path.parse(filename).name; 
+        fileSelector.appendChild(opt);
+    }
+}
 
 // const debug = document.getElementById("debug")
 
@@ -209,9 +234,9 @@ let loadOptions = {
 //Synchronous
 
 function saveAll() {
-    if (!sourcefilenameWithPath) {
-        sourcefilenameWithPath = dialog.showSaveDialogSync(WIN, saveOptions); // WORKS IF AI-FILE LOADED
-        const fileNameToDisplay = (sourcefilenameWithPath) ? path.parse(sourcefilenameWithPath).name : "<new file>";
+    if (!nameOfCurrentFile) {
+        nameOfCurrentFile = dialog.showSaveDialogSync(WIN, saveOptions); // WORKS IF AI-FILE LOADED
+        const fileNameToDisplay = (nameOfCurrentFile) ? path.parse(nameOfCurrentFile).name : "<new file>";
         document.title = `Encyclopedizer 2.0 - ${fileNameToDisplay}`;
     }
     const sortedTerms = Object.keys(entries).sort(caseIndependentSort);
@@ -219,10 +244,10 @@ function saveAll() {
     for (const term of sortedTerms) {
         totalText = totalText + `${term}: ${entries[term].trim()}\n\n`;
     }
-    fs.writeFile(sourcefilenameWithPath, totalText, function (err) {
+    fs.writeFile(nameOfCurrentFile, totalText, function (err) {
         if (err) alert(err);
     });
-    fs.writeFile(NAME_OF_FILE_HOLDING_DEFAULT_ENCY, sourcefilenameWithPath, function (err) {
+    fs.writeFile(NAME_OF_FILE_HOLDING_DEFAULT_ENCY, sourcefilenames.join("\n"), function (err) {
         if (err) alert(err);
     });
 }
@@ -253,8 +278,8 @@ function showNewEntry(newTerm, updateTermbox = false) {
 document.getElementById("loadEncy").onclick = function () {
     let newFilename = dialog.showOpenDialogSync(WIN, loadOptions);
     if (newFilename) {
-        sourcefilenameWithPath = newFilename[0];
-        entries = loadFile(sourcefilenameWithPath);
+        nameOfCurrentFile = newFilename[0];
+        entries = loadFile(nameOfCurrentFile);
         analyze();
     }
 }
