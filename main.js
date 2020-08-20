@@ -12,22 +12,22 @@ const NAME_OF_FILE_HOLDING_DEFAULT_ENCY = "default_ency2.txt";
 // THEN make a dropdown-box with the abbreviated names (map name->abbreviated name)
 function initializeEntries() {
     // case 1: the file containing the name of the default encyclopedia is not found. 
-    if (!fs.existsSync(NAME_OF_FILE_HOLDING_DEFAULT_ENCY)) return { sourcefilenameWithPath: undefined, entries: emptyObject };
+    if (!fs.existsSync(NAME_OF_FILE_HOLDING_DEFAULT_ENCY)) return { sourcefilenames: undefined, entries: emptyObject };
 
-    const allSourceFileNames = fs.readFileSync(NAME_OF_FILE_HOLDING_DEFAULT_ENCY).toString().split("\n").map(str => str.trim());
-    const sourcefilenameWithPath = allSourceFileNames[0];
-    alert(`filenames found: '${sourcefilenameWithPath}'/'${allSourceFileNames}'`);
+    const sourcefilenames = fs.readFileSync(NAME_OF_FILE_HOLDING_DEFAULT_ENCY).toString().split("\n").map(str => str.trim());
+    let latestSourcefilenameWithPath = sourcefilenames[0];
+    alert(`filenames found: '${latestSourcefilenameWithPath}'/'${sourcefilenames}'`);
     // case 2: the file containing the name of the default encyclopedia is found, but the file is empty
-    if (!sourcefilenameWithPath) return { undefined, emptyObject };
+    if (!latestSourcefilenameWithPath) return { undefined, emptyObject };
 
-    // case 3: the filename found does not point to an existing file.
-    if (!fs.existsSync(sourcefilenameWithPath)) return { sourcefilenameWithPath: undefined, entries: emptyObject };
+    // case 3: the filename found does not point to an existing file: loop over the names, trying to find one that works 
+    if (!fs.existsSync(sourcefilenameWithPath)) return { sourcefilenames: undefined, entries: emptyObject };
 
     const sourcefilename = path.basename(sourcefilenameWithPath);
     const data = fs.readFileSync(sourcefilenameWithPath);
 
     // case 4: the file is empty. 
-    if (!data || data.toString().trim() === "") return { sourcefilenameWithPath, entries: emptyObject };
+    if (!data || data.toString().trim() === "") return { sourcefilenamesWithPath, entries: emptyObject };
     fs.copyFile(sourcefilenameWithPath, `backup_${sourcefilename}`, (err) => {
         if (err) alert(`Error '${err} while making backup.`);
     });
@@ -38,8 +38,8 @@ function initializeEntries() {
     return { sourcefilenameWithPath, entries };
 }
 
-let { sourcefilenameWithPath, entries } = initializeEntries();
-const fileNameToDisplay = (sourcefilenameWithPath) ? path.parse(sourcefilenameWithPath).name : "<new file>";
+let { sourcefilenames, entries } = initializeEntries();
+const fileNameToDisplay = (sourcefilenameWithPath) ? path.parse(sourcefilenamesWithPath).name : "<new file>";
 document.title = `Encyclopedizer 2.0 - ${fileNameToDisplay}`;
 
 function loadFile(fileNameWithPath) {
