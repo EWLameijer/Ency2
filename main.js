@@ -7,87 +7,13 @@ const emptyObject = {}
 
 const NAME_OF_FILE_HOLDING_DEFAULT_ENCY = "default_ency.txt";
 
-const outputField = document.getElementById('output');
-const enteredTerm = document.getElementById('termEntry');
-const descriptionArea = document.getElementById('description');
-const focusedTermLabel = document.getElementById("focusedTerm");
-const fileSelector = document.getElementById("fileList");
-
-function initializeEntries() {
-    const failedReading = { sourcefilenames: undefined, entries: emptyObject };
-
-    // case 1: the file containing the name of the default encyclopedia is not found. 
-    if (!fs.existsSync(NAME_OF_FILE_HOLDING_DEFAULT_ENCY)) return failedReading;
-    const sourcefilenames = fs.readFileSync(NAME_OF_FILE_HOLDING_DEFAULT_ENCY).toString().split("\n").map(str => str.trim());
-
-    // case 2: the file containing the name of the default encyclopedia is found, but the file is empty
-    if (sourcefilenames == "") return failedReading;
-    
-    let namesOfExistingFiles = [];
-    for (const filename of sourcefilenames) {
-        if (fs.existsSync(filename)) namesOfExistingFiles.push(filename)
-    }
-    // case 3: the filename found does not point to an existing file: loop over the names, trying to find one that works 
-    if (namesOfExistingFiles.length == 0) return failedReading;
-    const firstFile = namesOfExistingFiles[0];
-    const sourcefilename = path.basename(firstFile);
-    const data = fs.readFileSync(firstFile);
-
-    // case 4: the file is empty. 
-    if (!data || data.toString().trim() === "") return { sourcefilenames, entries: emptyObject };
-    fs.copyFile(firstFile, `backup_${sourcefilename}`, (err) => {
-        if (err) alert(`Error '${err} while making backup.`);
-    });
-    const lines = data.toString().split("\n").filter(line => line !== "");
-    const entries = linesToEntries(lines);
-
-    // case 5: the file has contents, so a true encyclopedia can be loaded.
-    return { sourcefilenames, entries };
-}
-
-let { sourcefilenames, entries } = initializeEntries();
-let nameOfCurrentFile = sourcefilenames[0];
-const fileNameToDisplay = (nameOfCurrentFile) ? path.parse(nameOfCurrentFile).name : "<new file>";
-document.title = `Encyclopedizer 2.0 - ${fileNameToDisplay}`;
-fillFileSelector();
-
-function loadFile(fileNameWithPath) {
-    const sourcefilename = path.basename(fileNameWithPath);
-    const data = fs.readFileSync(fileNameWithPath);
-    if (!data || data.toString().trim() === "") return emptyObject;
-    fs.copyFile(fileNameWithPath, `backup_${sourcefilename}`, (err) => {
-        if (err) alert(`Error '${err} while making backup.`);
-    });
-    const lines = data.toString().split("\n").filter(line => line !== "");
-    const fileNameToDisplay = (fileNameWithPath) ? path.parse(fileNameWithPath).name : "<new file>";
-    document.title = `Encyclopedizer 2.0 - ${fileNameToDisplay}`;
-    return linesToEntries(lines);
-}
-
-fileSelector.onchange= function() {
-    saveAll()
-    entries = loadFile(fileSelector.value);
-    nameOfCurrentFile = fileSelector.value;
-    analyze();
-}
-
-function fillFileSelector() {
-    for (const filename of sourcefilenames) {
-        const opt = document.createElement("option");
-        opt.value = filename;
-        opt.innerHTML = path.parse(filename).name; 
-        fileSelector.appendChild(opt);
-    }
-}
-
-// const debug = document.getElementById("debug")
-
-const smaller = (a, b) => a < b;
-const larger = (a, b) => a > b;
-const startsWith = (a, b) => a.startsWith(b)
-
-function caseInsensitive(f) {
-    return (a, b) => f(a.toLocaleLowerCase(), b.toLocaleLowerCase());
+const g_ui = {
+    termsField: document.getElementById('termsList'),
+    enteredTerm: document.getElementById('termEntry'),
+    descriptionArea: document.getElementById('description'),
+    focusedTermLabel: document.getElementById("focusedTerm"),
+    fileSelector: document.getElementById("fileList"),
+    numEntriesLabel: document.getElementById("numEntries")
 }
 
 function caseIndependentSort(a, b) {
@@ -98,19 +24,93 @@ function caseIndependentSort(a, b) {
     else return 1;
 }
 
-const sortedKeys = () => Object.keys(entries).sort(caseIndependentSort);
+const g_data = {
+    sourcefilenames: [],
+    entries: {},
+    sortedKeys: () => Object.keys(this.entries).sort(caseIndependentSort),
+    nameOfCurrentFile: () => this.sourcefilenames.length === 0 ? undefined : this.sourcefilenames[0]
+}
+
+function initialize() {
+    g_data.sourcefilenames = [];
+    g_data.entries = {};
+
+    // case 1: the file containing the name of the default encyclopedia is not found. 
+    if (!fs.existsSync(NAME_OF_FILE_HOLDING_DEFAULT_ENCY)) return;
+    const sourcefilenames = fs.readFileSync(NAME_OF_FILE_HOLDING_DEFAULT_ENCY).toString().split("\n").map(str => str.trim());
+
+    // case 2: the file containing the name of the default encyclopedia is found, but the file is empty
+    if (sourcefilenames == "") return;
+
+    let namesOfExistingFiles = [];
+    for (const filename of sourcefilenames) {
+        if (fs.existsSync(filename)) namesOfExistingFiles.push(filename)
+    }
+    // case 3: the filename found does not point to an existing file: loop over the names, trying to find one that works 
+    if (namesOfExistingFiles.length == 0) return;
+    g_data.sourcefilenames = namesOfExistingFiles;
+    fillFileSelector();
+    const firstFile = namesOfExistingFiles[0];
+    loadFile(firstFile);
+}
+
+initialize();
+
+function loadFile(fileNameWithPath) {
+    const originalFilenames = g_data.sourcefilenames;
+    const originalFilenamesWithoutNewFiles = originalFilenames.filter(filename => filename !== fileNameWithPath);
+    originalFilenamesWithoutNewFiles.unshift(fileNameWithPath);
+    g_data.sourcefilenames = originalFilenamesWithoutNewFiles;
+
+    const sourcefilename = path.basename(fileNameWithPath);
+    const data = fs.readFileSync(fileNameWithPath);
+    if (!data || data.toString().trim() === "") return emptyObject;
+    fs.copyFile(fileNameWithPath, `backup_${sourcefilename}`, (err) => {
+        if (err) alert(`Error '${err} while making backup.`);
+    });
+    const lines = data.toString().split("\n").filter(line => line !== "");
+    const fileNameToDisplay = (fileNameWithPath) ? path.parse(fileNameWithPath).name : "<new file>";
+    document.title = `Encyclopedizer 2.0 - ${fileNameToDisplay}`;
+    g_data.entries = linesToEntries(lines);
+    analyze();
+}
+
+g_ui.fileSelector.onchange = function () {
+    saveAll()
+    const nameOfFileToLoad = this.value;
+    if (nameOfFileToLoad) loadFile(nameOfFileToLoad);
+}
+
+function fillFileSelector() {
+    g_ui.fileSelector.innerHTML = "";
+    for (const filename of g_data.sourcefilenames) {
+        const opt = document.createElement("option");
+        opt.value = filename;
+        opt.innerHTML = path.parse(filename).name;
+        g_ui.fileSelector.appendChild(opt);
+    }
+}
+
+const smaller = (a, b) => a < b;
+const larger = (a, b) => a > b;
+const startsWith = (a, b) => a.startsWith(b)
+
+function caseInsensitive(f) {
+    return (a, b) => f(a.toLocaleLowerCase(), b.toLocaleLowerCase());
+}
+
 
 const KEYCODE_HOME = 36;
 
 document.getElementById("removeEntry").onclick = function () {
     const response = confirm("Remove this entry?");
     if (response) {
-        const termToRemove = focusedTermLabel.textContent;
+        const termToRemove = g_ui.focusedTermLabel.textContent;
         // try to get the term after it; if that fails (last entry) go to the previous term, else (only entry) clear the field 
-        const replacementTerm = sortedKeys().find(term => caseInsensitive(larger)(term, termToRemove)) ??
-            sortedKeys().reverse().find(term => caseInsensitive(smaller)(term, termToRemove)) ?? "";
+        const replacementTerm = g_data.sortedKeys().find(term => caseInsensitive(larger)(term, termToRemove)) ??
+            g_data.ssortedKeys().reverse().find(term => caseInsensitive(smaller)(term, termToRemove)) ?? "";
         showNewEntry(replacementTerm, true);
-        delete entries[termToRemove];
+        delete g_data.entries[termToRemove];
     }
 }
 
@@ -125,9 +125,9 @@ document.onkeydown = function (evt) {
     }
     if (isEscape) {
         showNewEntry("", true);
-        enteredTerm.focus();
+        g_ui.enteredTerm.focus();
     } else if (evt.keyCode === KEYCODE_HOME) {
-        showNewEntry(sortedKeys()[0], true);
+        showNewEntry(g_data.sortedKeys()[0], true);
     }
 };
 
@@ -137,10 +137,10 @@ document.onkeydown = function (evt) {
 analyze();
 
 function analyze() {
-    document.getElementById("numEntries").innerHTML = Object.keys(entries).length; // may want to update this, but saving is more important!
-    const keys = Object.keys(entries);
-    outputField.innerText = keys.join("\n");
-    const firstTerm = sortedKeys()[0] ?? "";
+    g_ui.numEntriesLabel.innerHTML = Object.keys(g_data.entries).length; // may want to update this, but saving is more important!
+    const keys = g_data.sortedKeys();
+    g_ui.termsField.innerText = keys.join("\n");
+    const firstTerm = keys[0] ?? "";
     showNewEntry(firstTerm, true);
 }
 
@@ -148,18 +148,18 @@ function changeTerm() {
     var event = window.event ? window.event : e;
     const keyCode = event.keyCode;
     const KEYCODE_ENTER = 13;
-    const termGivenByUser = enteredTerm.value;
-    const selectedTerms = (termGivenByUser !== "") ? sortedKeys().filter(term => caseInsensitive(startsWith)(term, termGivenByUser)) : [];
+    const termGivenByUser = g_ui.enteredTerm.value;
+    const selectedTerms = (termGivenByUser !== "") ? g_data.sortedKeys().filter(term => caseInsensitive(startsWith)(term, termGivenByUser)) : [];
     const term = (keyCode === KEYCODE_ENTER || selectedTerms.length === 0) ? termGivenByUser : selectedTerms[0];
 
     showNewEntry(term);
-    if (keyCode === KEYCODE_ENTER) descriptionArea.focus();
+    if (keyCode === KEYCODE_ENTER) g_ui.descriptionArea.focus();
 }
 
 function updateDescription() {
-    if (focusedTermLabel.textContent == "") focusedTermLabel.textContent = enteredTerm.value;
-    const term = focusedTermLabel.textContent;
-    entries[term] = descriptionArea.value;
+    if (g_ui.focusedTermLabel.textContent == "") g_ui.focusedTermLabel.textContent = g_ui.enteredTerm.value;
+    const term = g_ui.focusedTermLabel.textContent;
+    g_data.entries[term] = g_ui.descriptionArea.value;
 }
 
 function linesToEntries(lines) {
@@ -229,20 +229,19 @@ let loadOptions = {
 //Synchronous
 
 function saveAll() {
-    if (!nameOfCurrentFile) {
-        nameOfCurrentFile = dialog.showSaveDialogSync(WIN, saveOptions); // WORKS IF AI-FILE LOADED
-        const fileNameToDisplay = (nameOfCurrentFile) ? path.parse(nameOfCurrentFile).name : "<new file>";
+    if (!g_data.nameOfCurrentFile()) {
+        g_data.sourcefilenames.unshift(dialog.showSaveDialogSync(WIN, saveOptions)); // WORKS IF AI-FILE LOADED
+        const fileNameToDisplay = (g_data.nameOfCurrentFile()) ? path.parse(g_data.nameOfCurrentFile()).name : "<new file>";
         document.title = `Encyclopedizer 2.0 - ${fileNameToDisplay}`;
     }
-    const sortedTerms = Object.keys(entries).sort(caseIndependentSort);
     let totalText = ""
-    for (const term of sortedTerms) {
-        totalText = totalText + `${term}: ${entries[term].trim()}\n\n`;
+    for (const term of g_data.sortedKeys()) {
+        totalText = totalText + `${term}: ${g_data.entries[term].trim()}\n\n`;
     }
-    fs.writeFile(nameOfCurrentFile, totalText, function (err) {
+    fs.writeFile(g_data.nameOfCurrentFile(), totalText, function (err) {
         if (err) alert(err);
     });
-    fs.writeFile(NAME_OF_FILE_HOLDING_DEFAULT_ENCY, sourcefilenames.join("\n"), function (err) {
+    fs.writeFile(NAME_OF_FILE_HOLDING_DEFAULT_ENCY, g_data.sourcefilenames.join("\n"), function (err) {
         if (err) alert(err);
     });
 }
@@ -252,31 +251,26 @@ function considerScrolling() {
     const keyCode = event.keyCode;
     const KEYCODE_DOWN = 40;
     const KEYCODE_UP = 38;
-    const selectedTerm = focusedTermLabel.textContent ?? "";
+    const selectedTerm = g_ui.focusedTermLabel.textContent ?? "";
     if (keyCode === KEYCODE_DOWN) {
-        const newTerm = sortedKeys().find(term => caseInsensitive(larger)(term, selectedTerm));
+        const newTerm = g_data.sortedKeys().find(term => caseInsensitive(larger)(term, selectedTerm));
         if (newTerm) showNewEntry(newTerm, true);
     } else if (keyCode === KEYCODE_UP) {
-        const newTerm = sortedKeys().reverse().find(term => caseInsensitive(smaller)(term, selectedTerm));
+        const newTerm = g_data.sortedKeys().reverse().find(term => caseInsensitive(smaller)(term, selectedTerm));
         if (newTerm) showNewEntry(newTerm, true);
     }
 }
 
 function showNewEntry(newTerm, updateTermbox = false) {
-    if (updateTermbox) enteredTerm.value = newTerm;
-    outputField.innerText = sortedKeys().filter(term => caseInsensitive(larger)(term, newTerm)).join("\n");
-    const description = entries[newTerm] ?? "";
-    focusedTermLabel.innerHTML = `<i>${newTerm}</i>`;
-    descriptionArea.value = description;
+    if (updateTermbox) g_ui.enteredTerm.value = newTerm;
+    g_ui.outputField.innerText = g_data.sortedKeys().filter(term => caseInsensitive(larger)(term, newTerm)).join("\n");
+    g_ui.focusedTermLabel.innerHTML = `<i>${newTerm}</i>`;
+    g_ui.descriptionArea.value = g_data.entries[newTerm] ?? "";;
 }
 
 document.getElementById("loadEncy").onclick = function () {
     let newFilename = dialog.showOpenDialogSync(WIN, loadOptions);
-    if (newFilename) {
-        nameOfCurrentFile = newFilename[0];
-        entries = loadFile(nameOfCurrentFile);
-        analyze();
-    }
+    if (newFilename) loadFile(newFilename[0]);
 }
 
 
