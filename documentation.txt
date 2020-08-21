@@ -7,11 +7,13 @@ TIME_SPENT { after each 100: 20 min theory, 10 min explore (Kotlin?) 5 min refle
 
 TODO {
   !! ALWAYS CREATE NEW BRANCH FOR FEATURE 
-  1. Check the error checking when loading multifile inputs
+
   2. merge master into it, test, then merge into master. Push!
   3. refactor a bit (especially the loadFile), and where analyze is called. Also make JSLint complain less...
   4. Work on ensuring the most recently opened file is on top 
   5. Work on if a new file is loaded, it is added on top of the selection menu
+  6. HOME -> CTRL+HOME // https://www.w3schools.com/jsref/event_key_ctrlkey.asp
+  7. make options file that saves the default path for loading and saving...
 
   !Scale size of text area  to size of screen...
 
@@ -68,6 +70,12 @@ DONE {
 
   1. automatically generate default_ency.txt if it does not exist yet, or at least don't crash if it is lacking. 100/10 m
   1. Allow loading fresh files (and save them in the defaultency); . 50v/20m // DONE 20200810
+    1. Check the error checking when loading multifile inputs // DONE 20200821
+      case 1: OK 
+      case 2: OK 
+      case 3: OK
+      case 4: OK
+      case 5: OK 
     
 
   

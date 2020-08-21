@@ -14,26 +14,21 @@ const focusedTermLabel = document.getElementById("focusedTerm");
 const fileSelector = document.getElementById("fileList");
 
 function initializeEntries() {
-    // case 1: the file containing the name of the default encyclopedia is not found. 
     const failedReading = { sourcefilenames: undefined, entries: emptyObject };
+
+    // case 1: the file containing the name of the default encyclopedia is not found. 
     if (!fs.existsSync(NAME_OF_FILE_HOLDING_DEFAULT_ENCY)) return failedReading;
-
     const sourcefilenames = fs.readFileSync(NAME_OF_FILE_HOLDING_DEFAULT_ENCY).toString().split("\n").map(str => str.trim());
-    alert(`filenames found: '${sourcefilenames}'`);
-    // case 2: the file containing the name of the default encyclopedia is found, but the file is empty
-    if (sourcefilenames == "") {
-        alert("No files found!")
-        return failedReading;
-    }
 
-    // case 3: the filename found does not point to an existing file: loop over the names, trying to find one that works 
+    // case 2: the file containing the name of the default encyclopedia is found, but the file is empty
+    if (sourcefilenames == "") return failedReading;
+    
     let namesOfExistingFiles = [];
     for (const filename of sourcefilenames) {
         if (fs.existsSync(filename)) namesOfExistingFiles.push(filename)
     }
-    alert(`files known: ${namesOfExistingFiles}`);
+    // case 3: the filename found does not point to an existing file: loop over the names, trying to find one that works 
     if (namesOfExistingFiles.length == 0) return failedReading;
-
     const firstFile = namesOfExistingFiles[0];
     const sourcefilename = path.basename(firstFile);
     const data = fs.readFileSync(firstFile);
