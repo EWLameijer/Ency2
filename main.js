@@ -137,8 +137,8 @@ function analyze() {
     showNewEntry(firstTerm, true);
 }
 
-g_ui.enteredTerm.onkeyup = function() {
-    var event = window.event ? window.event : e;
+g_ui.enteredTerm.onkeyup = function () {
+    var event = window.event 
     const keyCode = event.keyCode;
     const KEYCODE_ENTER = 13;
     const termGivenByUser = g_ui.enteredTerm.value;
@@ -149,7 +149,7 @@ g_ui.enteredTerm.onkeyup = function() {
     if (keyCode === KEYCODE_ENTER) g_ui.descriptionArea.focus();
 }
 
-function updateDescription() {
+g_ui.descriptionArea.onkeyup = function () {
     if (g_ui.focusedTermLabel.textContent == "") g_ui.focusedTermLabel.textContent = g_ui.enteredTerm.value;
     const term = g_ui.focusedTermLabel.textContent;
     g_data.entries[term] = g_ui.descriptionArea.value;
@@ -239,8 +239,8 @@ function saveAll() {
     });
 }
 
-function considerScrolling() {
-    var event = window.event ? window.event : e;
+g_ui.enteredTerm.onkeydown = function () {
+    var event = window.event;
     const keyCode = event.keyCode;
     const KEYCODE_DOWN = 40;
     const KEYCODE_UP = 38;
