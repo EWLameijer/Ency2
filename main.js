@@ -49,7 +49,6 @@ function initialize() {
     // case 3: the filename found does not point to an existing file: loop over the names, trying to find one that works 
     if (namesOfExistingFiles.length == 0) return;
     g_data.sourcefilenames = namesOfExistingFiles;
-    fillFileSelector();
     const firstFile = namesOfExistingFiles[0];
     loadFile(firstFile);
 }
@@ -57,10 +56,9 @@ function initialize() {
 initialize();
 
 function loadFile(fileNameWithPath) {
-    const originalFilenames = g_data.sourcefilenames;
-    const originalFilenamesWithoutNewFiles = originalFilenames.filter(filename => filename !== fileNameWithPath);
-    originalFilenamesWithoutNewFiles.unshift(fileNameWithPath);
-    g_data.sourcefilenames = originalFilenamesWithoutNewFiles;
+    const newlyPrioritizedFilenames = g_data.sourcefilenames.filter(filename => filename !== fileNameWithPath);
+    newlyPrioritizedFilenames.unshift(fileNameWithPath);
+    g_data.sourcefilenames = newlyPrioritizedFilenames;
 
     const sourcefilename = path.basename(fileNameWithPath);
     const data = fs.readFileSync(fileNameWithPath);
@@ -71,6 +69,7 @@ function loadFile(fileNameWithPath) {
     const lines = data.toString().split("\n").filter(line => line !== "");
     const fileNameToDisplay = (fileNameWithPath) ? path.parse(fileNameWithPath).name : "<new file>";
     document.title = `Encyclopedizer 2.0 - ${fileNameToDisplay}`;
+    fillFileSelector();
     g_data.entries = linesToEntries(lines);
     analyze();
 }
@@ -138,7 +137,7 @@ function analyze() {
     showNewEntry(firstTerm, true);
 }
 
-function changeTerm() {
+g_ui.enteredTerm.onkeyup = function() {
     var event = window.event ? window.event : e;
     const keyCode = event.keyCode;
     const KEYCODE_ENTER = 13;
