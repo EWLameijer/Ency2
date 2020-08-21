@@ -27,8 +27,8 @@ function caseIndependentSort(a, b) {
 const g_data = {
     sourcefilenames: [],
     entries: {},
-    sortedKeys: () => Object.keys(this.entries).sort(caseIndependentSort),
-    nameOfCurrentFile: () => this.sourcefilenames.length === 0 ? undefined : this.sourcefilenames[0]
+    sortedKeys: function () { return Object.keys(this.entries).sort(caseIndependentSort) },
+    nameOfCurrentFile: function () { return this.sourcefilenames.length === 0 ? undefined : this.sourcefilenames[0]; }
 }
 
 function initialize() {
@@ -99,7 +99,6 @@ function caseInsensitive(f) {
     return (a, b) => f(a.toLocaleLowerCase(), b.toLocaleLowerCase());
 }
 
-
 const KEYCODE_HOME = 36;
 
 document.getElementById("removeEntry").onclick = function () {
@@ -130,11 +129,6 @@ document.onkeydown = function (evt) {
         showNewEntry(g_data.sortedKeys()[0], true);
     }
 };
-
-// START THE ACTUAL WORK!
-
-
-analyze();
 
 function analyze() {
     g_ui.numEntriesLabel.innerHTML = Object.keys(g_data.entries).length; // may want to update this, but saving is more important!
@@ -263,9 +257,9 @@ function considerScrolling() {
 
 function showNewEntry(newTerm, updateTermbox = false) {
     if (updateTermbox) g_ui.enteredTerm.value = newTerm;
-    g_ui.outputField.innerText = g_data.sortedKeys().filter(term => caseInsensitive(larger)(term, newTerm)).join("\n");
+    g_ui.termsField.innerText = g_data.sortedKeys().filter(term => term.toLocaleLowerCase() > newTerm.toLocaleLowerCase()).join("\n");
     g_ui.focusedTermLabel.innerHTML = `<i>${newTerm}</i>`;
-    g_ui.descriptionArea.value = g_data.entries[newTerm] ?? "";;
+    g_ui.descriptionArea.value = g_data.entries[newTerm] ?? "";
 }
 
 document.getElementById("loadEncy").onclick = function () {
