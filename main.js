@@ -5,7 +5,7 @@ const path = require("path");
 
 const emptyObject = {}
 
-const NAME_OF_FILE_HOLDING_DEFAULT_ENCY = "default_ency2.txt";
+const NAME_OF_FILE_HOLDING_DEFAULT_ENCY = "default_ency.txt";
 
 const outputField = document.getElementById('output');
 const enteredTerm = document.getElementById('termEntry');
