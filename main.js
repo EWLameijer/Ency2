@@ -6,6 +6,7 @@ const path = require("path");
 const emptyObject = {}
 
 const NAME_OF_FILE_HOLDING_DEFAULT_ENCY = "default_ency.txt";
+const NAME_OF_FILE_HOLDING_SETTINGS = "ency_settings.txt";
 
 const g_ui = {
     termsField: document.getElementById('termsList'),
@@ -25,15 +26,18 @@ function caseIndependentSort(a, b) {
 }
 
 const g_data = {
-    initialize: function () { this.sourcefilenames = []; this.entries = {}; },
-    sourcefilenames: [],
     entries: {},
+    initialize: function () { this.sourcefilenames = []; this.entries = {}; },
+    nameOfCurrentFile: function () { return this.sourcefilenames.length === 0 ? undefined : this.sourcefilenames[0]; },
     sortedKeys: function () { return Object.keys(this.entries).sort(caseIndependentSort) },
-    nameOfCurrentFile: function () { return this.sourcefilenames.length === 0 ? undefined : this.sourcefilenames[0]; }
+    sourcefilenames: [],
+    standardEncyDirectory: "",
 }
 
 function initialize() {
     g_data.initialize();
+
+    if (fs.existsSync(NAME_OF_FILE_HOLDING_SETTINGS)) g_data.standardEncyDirectory = fs.readFileSync(NAME_OF_FILE_HOLDING_SETTINGS).toString();
 
     // case 1: the file containing the name of the default encyclopedia is not found. 
     if (!fs.existsSync(NAME_OF_FILE_HOLDING_DEFAULT_ENCY)) return;
@@ -206,7 +210,7 @@ const { remote } = require('electron'),
 
 
 let baseOptions = {
-    defaultPath: "D:\\Google Drive\\Job\\work_documents",
+    defaultPath: g_data.standardEncyDirectory,
     filters: [
         { name: 'Text Files', extensions: ['txt'] },
         { name: 'All Files', extensions: ['*'] }
@@ -223,13 +227,14 @@ function saveAll() {
     if (!g_data.nameOfCurrentFile()) { // get rid of undefined start 
         g_data.sourcefilenames[0] = (dialog.showSaveDialogSync(WIN, saveOptions));
         showFileNameChange();
+        updateStandardEncyDirectory();
     }
     let totalText = ""
     for (const term of g_data.sortedKeys()) {
         totalText += `${term}: ${g_data.entries[term].trim()}\n\n`;
     }
     fs.writeFile(g_data.nameOfCurrentFile(), totalText, errorHandler("saveAll error: cannot write to output file"));
-    fs.writeFile(NAME_OF_FILE_HOLDING_DEFAULT_ENCY, g_data.sourcefilenames.join("\n"), errorHandler("saveAll error: cannot write to configuration file"));
+    fs.writeFile(NAME_OF_FILE_HOLDING_DEFAULT_ENCY, g_data.sourcefilenames.join("\n"), errorHandler("saveAll error: cannot write to ency file glossary"));
 }
 
 g_ui.enteredTerm.onkeydown = function () {
@@ -264,7 +269,14 @@ function showNewEntry(newTerm) {
 
 document.getElementById("loadEncy").onclick = function () {
     let newFilename = dialog.showOpenDialogSync(WIN, loadOptions);
-    if (newFilename) loadFile(newFilename[0]);
+    if (newFilename) {
+        loadFile(newFilename[0]);
+        updateStandardEncyDirectory();
+    }
 }
 
+function updateStandardEncyDirectory() {
+    g_data.standardEncyDirectory = path.dirname(g_data.sourcefilenames[0]);
+    fs.writeFile(NAME_OF_FILE_HOLDING_SETTINGS, g_data.standardEncyDirectory, errorHandler("saveAll error: cannot write to configuration file"));
+}
 

@@ -1,3 +1,5 @@
 /node_modules/
 /default_ency.txt
 /.eslintrc.json
+/backup_*.txt
+/ency_settings.txt

@@ -9,17 +9,9 @@ TIME_SPENT { after each 100: 20 min theory, 10 min explore (Kotlin?) 5 min refle
 
 TODO {
   !! ALWAYS CREATE NEW BRANCH FOR FEATURE 
-
   
-  5. Work on if a new file is loaded, it is added on top of the selection menu 20/15
-  !Scale size of text area  to size of screen... 50 / 60
-  7. make options file that saves the default path for loading and saving... 16/ 30 
   2. rename entry: 20/40 min !!! String.fromCharCode
   3. bestudeer editen: bv save not tab-targeted? 2 v 15 m 
-  
-
-  
-  
 
 }
 
@@ -90,6 +82,9 @@ DONE {
       3. Make JSLint complain less...// DONE 20200821
     8. Allow making a new file (Electron!) 500 / 20 = 25 20200822
     6. HOME -> CTRL+HOME // https://www.w3schools.com/jsref/event_key_ctrlkey.asp 90/10 20200822
+    7. checked   5. Work on if a new file is loaded, it is added on top of the selection menu 20/15
+    !Scale size of text area  to size of screen... 50 / 60 Is now okayish... 20200822
+    8. make options file that saves the default path for loading and saving... 16/ 30 20200822
     
 
   
