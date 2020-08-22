@@ -25,6 +25,7 @@ function caseIndependentSort(a, b) {
 }
 
 const g_data = {
+    initialize: function () { this.sourcefilenames = []; this.entries = {}; },
     sourcefilenames: [],
     entries: {},
     sortedKeys: function () { return Object.keys(this.entries).sort(caseIndependentSort) },
@@ -32,8 +33,7 @@ const g_data = {
 }
 
 function initialize() {
-    g_data.sourcefilenames = [];
-    g_data.entries = {};
+    g_data.initialize();
 
     // case 1: the file containing the name of the default encyclopedia is not found. 
     if (!fs.existsSync(NAME_OF_FILE_HOLDING_DEFAULT_ENCY)) return;
@@ -71,15 +71,15 @@ function loadFile(fileNameWithPath) {
     if (!data || data.toString().trim() === "") return emptyObject;
     fs.copyFile(fileNameWithPath, `backup_${sourcefilename}`, errorHandler("Cannot back up file!"));
     const lines = data.toString().split("\n").filter(line => line !== "");
-    updateTitle();
-    fillFileSelector();
+
+
     g_data.entries = linesToEntries(lines);
-    analyze();
+    updateUiOnFileLoad();
 }
 
 g_ui.fileSelector.onchange = function () {
-    saveAll()
     const nameOfFileToLoad = this.value;
+    saveAll()
     if (nameOfFileToLoad) loadFile(nameOfFileToLoad);
 }
 
@@ -87,8 +87,13 @@ function fillFileSelector() {
     g_ui.fileSelector.innerHTML = "";
     for (const filename of g_data.sourcefilenames) {
         const opt = document.createElement("option");
-        opt.value = filename;
-        opt.innerHTML = path.parse(filename).name;
+        if (filename) {
+            opt.value = filename;
+            opt.innerHTML = path.parse(filename).name;
+        } else {
+            opt.value = "new file";
+            opt.innerHTML = "&lt;new file&gt;";
+        }
         g_ui.fileSelector.appendChild(opt);
     }
 }
@@ -115,6 +120,13 @@ document.getElementById("removeEntry").onclick = function () {
     }
 }
 
+document.getElementById("newEncy").onclick = function () {
+    saveAll();
+    g_data.sourcefilenames.unshift(undefined);
+    g_data.entries = {};
+    updateUiOnFileLoad();
+}
+
 // adjusted from https://stackoverflow.com/questions/3369593/how-to-detect-escape-key-press-with-pure-js-or-jquery
 document.onkeydown = function (evt) {
     evt = evt || window.event;
@@ -132,7 +144,13 @@ document.onkeydown = function (evt) {
     }
 };
 
-function analyze() {
+function updateFileNameChange() {
+    updateTitle();
+    fillFileSelector();
+}
+
+function updateUiOnFileLoad() {
+    updateFileNameChange()
     g_ui.numEntriesLabel.innerHTML = Object.keys(g_data.entries).length; // may want to update this, but saving is more important!
     const keys = g_data.sortedKeys();
     g_ui.termsField.innerText = keys.join("\n");
@@ -147,7 +165,7 @@ g_ui.enteredTerm.onkeyup = function () {
     const selectedTerms = (termGivenByUser !== "") ? g_data.sortedKeys().filter(term => caseInsensitive(startsWith)(term, termGivenByUser)) : [];
     const term = (keyCode === KEYCODE_ENTER || selectedTerms.length === 0) ? termGivenByUser : selectedTerms[0];
 
-    showNewEntry(term); 
+    showNewEntry(term);
     if (keyCode === KEYCODE_ENTER) g_ui.descriptionArea.focus();
 }
 
@@ -195,30 +213,23 @@ let baseOptions = {
     ]
 }
 
-let saveOptions = Object.assign(baseOptions, {
-    title: "Save Encyclopedia",
-    buttonLabel: "Save File",
-});
+let saveOptions = Object.assign({ title: "Save Encyclopedia", buttonLabel: "Save File" }, baseOptions);
 
-
-let loadOptions = Object.assign(baseOptions, {
-    title: "Load Encyclopedia",
-    buttonLabel: "Load File"
-});
+let loadOptions = Object.assign({ title: "Load Encyclopedia", buttonLabel: "Load File" }, baseOptions);
 
 //Synchronous
 
 function saveAll() {
-    if (!g_data.nameOfCurrentFile()) {
-        g_data.sourcefilenames.unshift(dialog.showSaveDialogSync(WIN, saveOptions)); 
-        updateTitle();
+    if (!g_data.nameOfCurrentFile()) { // get rid of undefined start 
+        g_data.sourcefilenames[0] = (dialog.showSaveDialogSync(WIN, saveOptions));
+        updateFileNameChange();
     }
     let totalText = ""
     for (const term of g_data.sortedKeys()) {
         totalText += `${term}: ${g_data.entries[term].trim()}\n\n`;
     }
     fs.writeFile(g_data.nameOfCurrentFile(), totalText, errorHandler("saveAll error: cannot write to output file"));
-    fs.writeFile(NAME_OF_FILE_HOLDING_DEFAULT_ENCY, g_data.sourcefilenames.join("\n"),errorHandler("saveAll error: cannot write to configuration file"));
+    fs.writeFile(NAME_OF_FILE_HOLDING_DEFAULT_ENCY, g_data.sourcefilenames.join("\n"), errorHandler("saveAll error: cannot write to configuration file"));
 }
 
 g_ui.enteredTerm.onkeydown = function () {
