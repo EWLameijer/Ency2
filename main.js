@@ -55,6 +55,12 @@ function initialize() {
 
 initialize();
 
+function errorHandler(message) {
+    return (err) => {
+        if (err) alert(message);
+    }
+}
+
 function loadFile(fileNameWithPath) {
     const newlyPrioritizedFilenames = g_data.sourcefilenames.filter(filename => filename !== fileNameWithPath);
     newlyPrioritizedFilenames.unshift(fileNameWithPath);
@@ -63,12 +69,9 @@ function loadFile(fileNameWithPath) {
     const sourcefilename = path.basename(fileNameWithPath);
     const data = fs.readFileSync(fileNameWithPath);
     if (!data || data.toString().trim() === "") return emptyObject;
-    fs.copyFile(fileNameWithPath, `backup_${sourcefilename}`, (err) => {
-        if (err) alert(`Error '${err} while making backup.`);
-    });
+    fs.copyFile(fileNameWithPath, `backup_${sourcefilename}`, errorHandler("Cannot back up file!"));
     const lines = data.toString().split("\n").filter(line => line !== "");
-    const fileNameToDisplay = (fileNameWithPath) ? path.parse(fileNameWithPath).name : "<new file>";
-    document.title = `Encyclopedizer 2.0 - ${fileNameToDisplay}`;
+    updateTitle();
     fillFileSelector();
     g_data.entries = linesToEntries(lines);
     analyze();
@@ -106,8 +109,8 @@ document.getElementById("removeEntry").onclick = function () {
         const termToRemove = g_ui.focusedTermLabel.textContent;
         // try to get the term after it; if that fails (last entry) go to the previous term, else (only entry) clear the field 
         const replacementTerm = g_data.sortedKeys().find(term => caseInsensitive(larger)(term, termToRemove)) ??
-            g_data.ssortedKeys().reverse().find(term => caseInsensitive(smaller)(term, termToRemove)) ?? "";
-        showNewEntry(replacementTerm, true);
+            g_data.sortedKeys().reverse().find(term => caseInsensitive(smaller)(term, termToRemove)) ?? "";
+        loadTerm(replacementTerm);
         delete g_data.entries[termToRemove];
     }
 }
@@ -122,10 +125,10 @@ document.onkeydown = function (evt) {
         isEscape = (evt.keyCode === 27);
     }
     if (isEscape) {
-        showNewEntry("", true);
+        loadTerm("");
         g_ui.enteredTerm.focus();
     } else if (evt.keyCode === KEYCODE_HOME) {
-        showNewEntry(g_data.sortedKeys()[0], true);
+        loadTerm(g_data.sortedKeys()[0]);
     }
 };
 
@@ -134,18 +137,17 @@ function analyze() {
     const keys = g_data.sortedKeys();
     g_ui.termsField.innerText = keys.join("\n");
     const firstTerm = keys[0] ?? "";
-    showNewEntry(firstTerm, true);
+    loadTerm(firstTerm);
 }
 
 g_ui.enteredTerm.onkeyup = function () {
-    var event = window.event 
-    const keyCode = event.keyCode;
+    const keyCode = window.event.keyCode;
     const KEYCODE_ENTER = 13;
     const termGivenByUser = g_ui.enteredTerm.value;
     const selectedTerms = (termGivenByUser !== "") ? g_data.sortedKeys().filter(term => caseInsensitive(startsWith)(term, termGivenByUser)) : [];
     const term = (keyCode === KEYCODE_ENTER || selectedTerms.length === 0) ? termGivenByUser : selectedTerms[0];
 
-    showNewEntry(term);
+    showNewEntry(term); 
     if (keyCode === KEYCODE_ENTER) g_ui.descriptionArea.focus();
 }
 
@@ -184,78 +186,66 @@ const { remote } = require('electron'),
     dialog = remote.dialog,
     WIN = remote.getCurrentWindow();
 
-let saveOptions = {
-    //Placeholder 1
+
+let baseOptions = {
+    defaultPath: "D:\\Google Drive\\Job\\work_documents",
+    filters: [
+        { name: 'Text Files', extensions: ['txt'] },
+        { name: 'All Files', extensions: ['*'] }
+    ]
+}
+
+let saveOptions = Object.assign(baseOptions, {
     title: "Save Encyclopedia",
-
-    //Placeholder 2
-    defaultPath: "D:\\Google Drive\\Job\\work_documents",
-
-    //Placeholder 4
     buttonLabel: "Save File",
-
-    //Placeholder 3
-    filters: [
-        { name: 'Text Files', extensions: ['txt'] },
-        { name: 'All Files', extensions: ['*'] }
-    ]
-}
+});
 
 
-let loadOptions = {
-    //Placeholder 1
+let loadOptions = Object.assign(baseOptions, {
     title: "Load Encyclopedia",
-
-    //Placeholder 2
-    defaultPath: "D:\\Google Drive\\Job\\work_documents",
-
-    //Placeholder 4
-    buttonLabel: "Load File",
-
-    //Placeholder 3
-    filters: [
-        { name: 'Text Files', extensions: ['txt'] },
-        { name: 'All Files', extensions: ['*'] }
-    ]
-}
+    buttonLabel: "Load File"
+});
 
 //Synchronous
 
 function saveAll() {
     if (!g_data.nameOfCurrentFile()) {
-        g_data.sourcefilenames.unshift(dialog.showSaveDialogSync(WIN, saveOptions)); // WORKS IF AI-FILE LOADED
-        const fileNameToDisplay = (g_data.nameOfCurrentFile()) ? path.parse(g_data.nameOfCurrentFile()).name : "<new file>";
-        document.title = `Encyclopedizer 2.0 - ${fileNameToDisplay}`;
+        g_data.sourcefilenames.unshift(dialog.showSaveDialogSync(WIN, saveOptions)); 
+        updateTitle();
     }
     let totalText = ""
     for (const term of g_data.sortedKeys()) {
-        totalText = totalText + `${term}: ${g_data.entries[term].trim()}\n\n`;
+        totalText += `${term}: ${g_data.entries[term].trim()}\n\n`;
     }
-    fs.writeFile(g_data.nameOfCurrentFile(), totalText, function (err) {
-        if (err) alert(err);
-    });
-    fs.writeFile(NAME_OF_FILE_HOLDING_DEFAULT_ENCY, g_data.sourcefilenames.join("\n"), function (err) {
-        if (err) alert(err);
-    });
+    fs.writeFile(g_data.nameOfCurrentFile(), totalText, errorHandler("saveAll error: cannot write to output file"));
+    fs.writeFile(NAME_OF_FILE_HOLDING_DEFAULT_ENCY, g_data.sourcefilenames.join("\n"),errorHandler("saveAll error: cannot write to configuration file"));
 }
 
 g_ui.enteredTerm.onkeydown = function () {
-    var event = window.event;
-    const keyCode = event.keyCode;
+    const keyCode = window.event.keyCode;
     const KEYCODE_DOWN = 40;
     const KEYCODE_UP = 38;
     const selectedTerm = g_ui.focusedTermLabel.textContent ?? "";
     if (keyCode === KEYCODE_DOWN) {
         const newTerm = g_data.sortedKeys().find(term => caseInsensitive(larger)(term, selectedTerm));
-        if (newTerm) showNewEntry(newTerm, true);
+        if (newTerm) loadTerm(newTerm);
     } else if (keyCode === KEYCODE_UP) {
         const newTerm = g_data.sortedKeys().reverse().find(term => caseInsensitive(smaller)(term, selectedTerm));
-        if (newTerm) showNewEntry(newTerm, true);
+        if (newTerm) loadTerm(newTerm);
     }
 }
 
-function showNewEntry(newTerm, updateTermbox = false) {
-    if (updateTermbox) g_ui.enteredTerm.value = newTerm;
+function updateTitle() {
+    const fileNameToDisplay = (g_data.nameOfCurrentFile()) ? path.parse(g_data.nameOfCurrentFile()).name : "<new file>";
+    document.title = `Encyclopedizer 2.0 - ${fileNameToDisplay}`;
+}
+
+function loadTerm(newTerm) {
+    g_ui.enteredTerm.value = newTerm;
+    showNewEntry(newTerm);
+}
+
+function showNewEntry(newTerm) {
     g_ui.termsField.innerText = g_data.sortedKeys().filter(term => term.toLocaleLowerCase() > newTerm.toLocaleLowerCase()).join("\n");
     g_ui.focusedTermLabel.innerHTML = `<i>${newTerm}</i>`;
     g_ui.descriptionArea.value = g_data.entries[newTerm] ?? "";
