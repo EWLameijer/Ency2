@@ -139,18 +139,18 @@ document.onkeydown = function (evt) {
     if (isEscape) {
         loadTerm("");
         g_ui.enteredTerm.focus();
-    } else if (evt.keyCode === KEYCODE_HOME) {
+    } else if (evt.keyCode === KEYCODE_HOME && evt.ctrlKey) {
         loadTerm(g_data.sortedKeys()[0]);
     }
 };
 
-function updateFileNameChange() {
+function showFileNameChange() {
     updateTitle();
     fillFileSelector();
 }
 
 function updateUiOnFileLoad() {
-    updateFileNameChange()
+    showFileNameChange()
     g_ui.numEntriesLabel.innerHTML = Object.keys(g_data.entries).length; // may want to update this, but saving is more important!
     const keys = g_data.sortedKeys();
     g_ui.termsField.innerText = keys.join("\n");
@@ -222,7 +222,7 @@ let loadOptions = Object.assign({ title: "Load Encyclopedia", buttonLabel: "Load
 function saveAll() {
     if (!g_data.nameOfCurrentFile()) { // get rid of undefined start 
         g_data.sourcefilenames[0] = (dialog.showSaveDialogSync(WIN, saveOptions));
-        updateFileNameChange();
+        showFileNameChange();
     }
     let totalText = ""
     for (const term of g_data.sortedKeys()) {

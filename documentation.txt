@@ -11,19 +11,16 @@ TODO {
   !! ALWAYS CREATE NEW BRANCH FOR FEATURE 
 
   
-  6. HOME -> CTRL+HOME // https://www.w3schools.com/jsref/event_key_ctrlkey.asp 90/10
   5. Work on if a new file is loaded, it is added on top of the selection menu 20/15
+  !Scale size of text area  to size of screen... 50 / 60
   7. make options file that saves the default path for loading and saving... 16/ 30 
- 
-
-  !Scale size of text area  to size of screen...
-
   2. rename entry: 20/40 min !!! String.fromCharCode
   3. bestudeer editen: bv save not tab-targeted? 2 v 15 m 
-  4. possibly refactor to have all function assignments in JS instead of HTML (to make ESlint less troublesome?) 10m vs 20m
-  5. Make a nicer readme.md; 
+  
 
-  Create dropdownbox to list multiple encys, also adjust the file-file to have multiple lines, with the most recent one first.
+  
+  
+
 }
 
 IMPORTANT NOTES {
@@ -92,6 +89,7 @@ DONE {
     4. Work on ensuring the most recently opened file is on top  // DONE 20200821
       3. Make JSLint complain less...// DONE 20200821
     8. Allow making a new file (Electron!) 500 / 20 = 25 20200822
+    6. HOME -> CTRL+HOME // https://www.w3schools.com/jsref/event_key_ctrlkey.asp 90/10 20200822
     
 
   
