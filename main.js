@@ -217,9 +217,9 @@ let baseOptions = {
     ]
 }
 
-let saveOptions = Object.assign({ title: "Save Encyclopedia", buttonLabel: "Save File" }, baseOptions);
+let saveOptions = { title: "Save Encyclopedia", buttonLabel: "Save File", ...baseOptions };
 
-let loadOptions = Object.assign({ title: "Load Encyclopedia", buttonLabel: "Load File" }, baseOptions);
+let loadOptions = { title: "Load Encyclopedia", buttonLabel: "Load File", ...baseOptions };
 
 //Synchronous
 

@@ -13,7 +13,9 @@
   "author": "Eric-Wubbo Lameijer",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^9.1.1",
     "eslint": "^7.6.0"
+  },
+  "dependencies": {
+    "electron": "^9.2.1"
   }
 }

@@ -3,7 +3,9 @@
 !IMPORTANT NOTES 
 
 TIME_SPENT { after each 100: 20 min theory, 10 min explore (Kotlin?) 5 min reflect}
-83...
+...18
+..118: 20 min study: -> p28 <start> 10 min: problems with Gradle - https://stackoverflow.com/questions/18487406/how-do-i-tell-gradle-to-use-specific-jdk-version
+83...+82+53 = 218. 20 min study -> p23, 10 tryout: need to know more about Kotlin JS 
 20200810:19:03-20:12=69 min 20200821: +114 min => 183, so 20 min study (tot p7), 10 min exp! (done; not finished yet with Kotlin. Try 3x10, then skip 3/learn KotlinJS??)
  
 
