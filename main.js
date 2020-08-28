@@ -29,6 +29,7 @@ const g_data = {
     entries: {},
     initialize: function () { this.sourcefilenames = []; this.entries = {}; },
     nameOfCurrentFile: function () { return this.sourcefilenames.length === 0 ? undefined : this.sourcefilenames[0]; },
+    originalDescription: undefined,
     sortedKeys: function () { return Object.keys(this.entries).sort(caseIndependentSort) },
     sourcefilenames: [],
     standardEncyDirectory: "",
@@ -145,11 +146,13 @@ document.onkeydown = function (evt) {
         g_ui.enteredTerm.focus();
     } else if (evt.keyCode === KEYCODE_HOME && evt.ctrlKey) {
         loadTerm(g_data.sortedKeys()[0]);
+    } else if (evt.key.toLowerCase() === "s" && evt.ctrlKey) {
+        saveAll();
     }
 };
 
 function showFileNameChange() {
-    updateTitle();
+    updateTitle(false);
     fillFileSelector();
 }
 
@@ -177,6 +180,7 @@ g_ui.descriptionArea.onkeyup = function () {
     if (g_ui.focusedTermLabel.textContent == "") g_ui.focusedTermLabel.textContent = g_ui.enteredTerm.value;
     const term = g_ui.focusedTermLabel.textContent;
     g_data.entries[term] = g_ui.descriptionArea.value;
+    updateTitle(g_ui.descriptionArea.value != g_data.originalDescription); // reflect that the contents are modified
 }
 
 function linesToEntries(lines) {
@@ -221,12 +225,10 @@ let saveOptions = { title: "Save Encyclopedia", buttonLabel: "Save File", ...bas
 
 let loadOptions = { title: "Load Encyclopedia", buttonLabel: "Load File", ...baseOptions };
 
-//Synchronous
-
 function saveAll() {
     if (!g_data.nameOfCurrentFile()) { // get rid of undefined start 
         g_data.sourcefilenames[0] = (dialog.showSaveDialogSync(WIN, saveOptions));
-        showFileNameChange();
+        fillFileSelector();
         updateStandardEncyDirectory();
     }
     let totalText = ""
@@ -235,6 +237,8 @@ function saveAll() {
     }
     fs.writeFile(g_data.nameOfCurrentFile(), totalText, errorHandler("saveAll error: cannot write to output file"));
     fs.writeFile(NAME_OF_FILE_HOLDING_DEFAULT_ENCY, g_data.sourcefilenames.join("\n"), errorHandler("saveAll error: cannot write to ency file glossary"));
+    g_data.originalDescription = g_ui.descriptionArea.value;
+    updateTitle(false);
 }
 
 g_ui.enteredTerm.onkeydown = function () {
@@ -251,9 +255,10 @@ g_ui.enteredTerm.onkeydown = function () {
     }
 }
 
-function updateTitle() {
+function updateTitle(modifiedSinceLastSave) {
     const fileNameToDisplay = (g_data.nameOfCurrentFile()) ? path.parse(g_data.nameOfCurrentFile()).name : "<new file>";
-    document.title = `Encyclopedizer 2.0 - ${fileNameToDisplay}`;
+    const modifiedPart = (modifiedSinceLastSave) ? "UNSAVED CHANGES" : "saved"
+    document.title = `Encyclopedizer 2.0 - ${fileNameToDisplay} - ${modifiedPart}`;
 }
 
 function loadTerm(newTerm) {
@@ -265,6 +270,7 @@ function showNewEntry(newTerm) {
     g_ui.termsField.innerText = g_data.sortedKeys().filter(term => term.toLocaleLowerCase() > newTerm.toLocaleLowerCase()).join("\n");
     g_ui.focusedTermLabel.innerHTML = `<i>${newTerm}</i>`;
     g_ui.descriptionArea.value = g_data.entries[newTerm] ?? "";
+    g_data.originalDescription = g_ui.descriptionArea.value;
 }
 
 document.getElementById("loadEncy").onclick = function () {

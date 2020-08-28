@@ -14,7 +14,6 @@ TODO {
   
   2. rename entry: 20/40 min !!! String.fromCharCode
   3. bestudeer editen: bv save not tab-targeted? 2 v 15 m 
-
 }
 
 IMPORTANT NOTES {
@@ -87,6 +86,7 @@ DONE {
     7. checked   5. Work on if a new file is loaded, it is added on top of the selection menu 20/15
     !Scale size of text area  to size of screen... 50 / 60 Is now okayish... 20200822
     8. make options file that saves the default path for loading and saving... 16/ 30 20200822
+      1. Ctrl-S for saving + warning if unsaved 500 / 20 20200828
     
 
   
