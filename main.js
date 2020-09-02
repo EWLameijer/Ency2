@@ -176,27 +176,84 @@ g_ui.enteredTerm.onkeyup = function () {
     if (keyCode === KEYCODE_ENTER) g_ui.descriptionArea.focus();
 }
 
+function quoted(text) {
+    let result = '"'
+    for (const ch of text) {
+        if (ch === '"' || ch === '\\') result += '\\';
+        result += ch;
+    }
+    return result + '"';
+}
+
 g_ui.descriptionArea.onkeyup = function () {
     if (g_ui.focusedTermLabel.textContent == "") g_ui.focusedTermLabel.textContent = g_ui.enteredTerm.value;
     const term = g_ui.focusedTermLabel.textContent;
-    g_data.entries[term] = g_ui.descriptionArea.value;
+    g_data.entries[term] = quoted(g_ui.descriptionArea.value);
     updateTitle(g_ui.descriptionArea.value != g_data.originalDescription); // reflect that the contents are modified
 }
 
+
+/*
+Okay. So there can be two kinds of inputs:
+'normal' 
+a : b
+    c:d
+    e 
+
+or quoted 
+a: "b 
+c:d
+e"
+
+the second differs from the first in that a) the description is recognized to start with a '"'
+
+*/
 function linesToEntries(lines) {
     const result = {};
+    let inQuotedDescription = false;
     let mostRecentTerm = "";
     for (const line of lines) {
         const colonPosition = line.indexOf(":");
-        if (line.startsWith("\t") || colonPosition < 0) {
-            result[mostRecentTerm] = `${result[mostRecentTerm]}\n${line}`;
+        if (!inQuotedDescription) {
+            if (line.startsWith("\t") || colonPosition < 0) {
+                result[mostRecentTerm] = `${result[mostRecentTerm]}\n${line}`;
+            } else {
+                const { term, description } = getTermAndDescription(line);
+                result[term] = description;
+                if (opensUnclosedQuote(description)) inQuotedDescription = true;
+                mostRecentTerm = term;
+            }
         } else {
-            const { term, description } = getTermAndDescription(line);
-            result[term] = description;
-            mostRecentTerm = term;
+            result[mostRecentTerm] = `${result[mostRecentTerm]}\n${line}`;
+            if (closesQuote(line)) inQuotedDescription = false;
         }
     }
+    ensureAllAreQuoted(result);
     return result;
+}
+
+function opensUnclosedQuote(text) {
+    return text[0] === '"' && !closesQuote(text);
+}
+
+function countBackslashesAtEnd(text) {
+    let count = 0;
+    for (let i = text.length - 1; i >= 0; i--) {
+        if (text[i] !== '\\') break;
+        else count++;
+    }
+    return count;
+}
+
+function closesQuote(text) {
+    return text[text.length - 1] === '"' && countBackslashesAtEnd(text.substring(0, text.length - 1)) % 2 == 0
+}
+
+function ensureAllAreQuoted(ency) {
+    for (const term in ency) {
+        const description = ency[term];
+        if (description[0] !== '"' || !closesQuote(description)) ency[term] = quoted(description)
+    }
 }
 
 function getTermAndDescription(line) {
@@ -269,8 +326,26 @@ function loadTerm(newTerm) {
 function showNewEntry(newTerm) {
     g_ui.termsField.innerText = g_data.sortedKeys().filter(term => term.toLocaleLowerCase() > newTerm.toLocaleLowerCase()).join("\n");
     g_ui.focusedTermLabel.innerHTML = `<i>${newTerm}</i>`;
-    g_ui.descriptionArea.value = g_data.entries[newTerm] ?? "";
+    g_ui.descriptionArea.value = unquoted(g_data.entries[newTerm]) ?? "";
     g_data.originalDescription = g_ui.descriptionArea.value;
+}
+
+function unquoted(text) {
+    const rawContents = text.substring(1, text.length - 1);
+    let result = "";
+    let keepNextBackslash = false;
+    for (const index in Object.keys(rawContents)) {
+        if (isEscapingBackslash(parseInt(index), rawContents) && !keepNextBackslash) keepNextBackslash = true;
+        else {
+            result += rawContents[index];
+            keepNextBackslash = false;
+        }
+    }
+    return result;
+}
+
+function isEscapingBackslash(index, text) {
+    return (index < text.length - 1) && (text[index] === '\\') && (text[index + 1] === '"' || text[index + 1] === '\\');
 }
 
 document.getElementById("loadEncy").onclick = function () {
