@@ -326,7 +326,7 @@ function loadTerm(newTerm) {
 function showNewEntry(newTerm) {
     g_ui.termsField.innerText = g_data.sortedKeys().filter(term => term.toLocaleLowerCase() > newTerm.toLocaleLowerCase()).join("\n");
     g_ui.focusedTermLabel.innerHTML = `<i>${newTerm}</i>`;
-    g_ui.descriptionArea.value = unquoted(g_data.entries[newTerm]) ?? "";
+    g_ui.descriptionArea.value = unquoted(g_data.entries[newTerm] ?? "");
     g_data.originalDescription = g_ui.descriptionArea.value;
 }
 
