@@ -1,0 +1,8 @@
+Investigations into Kotlin.js 
+
+https://kotlinlang.org/docs/reference/js-project-setup.html#:~:text=To%20create%20a%20Kotlin%2FJS,Kotlin%20DSL%20build%20script%20option.
+
+Problem: Gradle complains it needs a JDK, not a JRE to build. 
+Gradle is in D:\development . Anyway, good to update gradle, was 5.4.1, now is 6.6.1
+
+OK. Next time (startup) check that Windows can find new gradle version (gradle -v), then see if you can update the JDK/JRE

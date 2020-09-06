@@ -29,7 +29,7 @@ const g_data = {
     entries: {},
     initialize: function () { this.sourcefilenames = []; this.entries = {}; },
     nameOfCurrentFile: function () { return this.sourcefilenames.length === 0 ? undefined : this.sourcefilenames[0]; },
-    originalDescription: undefined,
+    originalEntries: {},
     sortedKeys: function () { return Object.keys(this.entries).sort(caseIndependentSort) },
     sourcefilenames: [],
     standardEncyDirectory: "",
@@ -79,6 +79,7 @@ function loadFile(fileNameWithPath) {
 
 
     g_data.entries = linesToEntries(lines);
+    g_data.originalEntries = {};
     updateUiOnFileLoad();
 }
 
@@ -152,7 +153,7 @@ document.onkeydown = function (evt) {
 };
 
 function showFileNameChange() {
-    updateTitle(false);
+    updateTitle();
     fillFileSelector();
 }
 
@@ -189,7 +190,7 @@ g_ui.descriptionArea.onkeyup = function () {
     if (g_ui.focusedTermLabel.textContent == "") g_ui.focusedTermLabel.textContent = g_ui.enteredTerm.value;
     const term = g_ui.focusedTermLabel.textContent;
     g_data.entries[term] = quoted(g_ui.descriptionArea.value);
-    updateTitle(g_ui.descriptionArea.value != g_data.originalDescription); // reflect that the contents are modified
+    updateTitle(); // reflect that the contents are modified
 }
 
 
@@ -294,8 +295,9 @@ function saveAll() {
     }
     fs.writeFile(g_data.nameOfCurrentFile(), totalText, errorHandler("saveAll error: cannot write to output file"));
     fs.writeFile(NAME_OF_FILE_HOLDING_DEFAULT_ENCY, g_data.sourcefilenames.join("\n"), errorHandler("saveAll error: cannot write to ency file glossary"));
-    g_data.originalDescription = g_ui.descriptionArea.value;
-    updateTitle(false);
+    const currentTerm = g_ui.focusedTermLabel.textContent;
+    g_data.originalEntries = { currentTerm: g_data.entries[currentTerm] };
+    updateTitle();
 }
 
 g_ui.enteredTerm.onkeydown = function () {
@@ -312,8 +314,13 @@ g_ui.enteredTerm.onkeydown = function () {
     }
 }
 
-function updateTitle(modifiedSinceLastSave) {
+function updateTitle() {
     const fileNameToDisplay = (g_data.nameOfCurrentFile()) ? path.parse(g_data.nameOfCurrentFile()).name : "<new file>";
+    const originalEntries = g_data.originalEntries;
+    let modifiedSinceLastSave = false;
+    for (const term in originalEntries) {
+        if (originalEntries[term] !== g_data.entries[term]) modifiedSinceLastSave = true;
+    }
     const modifiedPart = (modifiedSinceLastSave) ? "UNSAVED CHANGES" : "saved"
     document.title = `Encyclopedizer 2.0 - ${fileNameToDisplay} - ${modifiedPart}`;
 }
@@ -323,12 +330,11 @@ function loadTerm(newTerm) {
     showNewEntry(newTerm);
 }
 
-
 function showNewEntry(newTerm) {
     g_ui.termsField.innerText = g_data.sortedKeys().filter(term => term.toLocaleLowerCase() > newTerm.toLocaleLowerCase()).join("\n");
     g_ui.focusedTermLabel.innerText = newTerm;
     g_ui.descriptionArea.value = unquoted(g_data.entries[newTerm] ?? "");
-    g_data.originalDescription = g_ui.descriptionArea.value;
+    if (g_data.originalEntries[newTerm] === undefined) g_data.originalEntries[newTerm] = g_data.entries[newTerm];
 }
 
 function unquoted(text) {
