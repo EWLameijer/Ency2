@@ -296,7 +296,7 @@ function saveAll() {
     fs.writeFile(g_data.nameOfCurrentFile(), totalText, errorHandler("saveAll error: cannot write to output file"));
     fs.writeFile(NAME_OF_FILE_HOLDING_DEFAULT_ENCY, g_data.sourcefilenames.join("\n"), errorHandler("saveAll error: cannot write to ency file glossary"));
     const currentTerm = g_ui.focusedTermLabel.textContent;
-    g_data.originalEntries = { currentTerm: g_data.entries[currentTerm] };
+    g_data.originalEntries = { [currentTerm]: g_data.entries[currentTerm] };
     updateTitle();
 }
 
