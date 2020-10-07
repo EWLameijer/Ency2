@@ -9,12 +9,15 @@ const NAME_OF_FILE_HOLDING_DEFAULT_ENCY = "default_ency.txt";
 const NAME_OF_FILE_HOLDING_SETTINGS = "ency_settings.txt";
 
 const g_ui = {
-    termsField: document.getElementById('termsList'),
-    enteredTerm: document.getElementById('termEntry'),
-    descriptionArea: document.getElementById('description'),
-    focusedTermLabel: document.getElementById("focusedTerm"),
-    fileSelector: document.getElementById("fileList"),
-    numEntriesLabel: document.getElementById("numEntries")
+    confirmRenameButton: document.querySelector("#confirmRenameEntry"),
+    termsField: document.querySelector('#termsList'),
+    enteredTerm: document.querySelector('#termEntry'),
+    descriptionArea: document.querySelector('#description'),
+    focusedTermLabel: document.querySelector("#focusedTerm"),
+    fileSelector: document.querySelector("#fileList"),
+    numEntriesLabel: document.querySelector("#numEntries"),
+    renamedTerm: document.querySelector("#renamedTermEntry"),
+    toggleRenameButton: document.querySelector("#renameEntry")
 }
 
 function caseIndependentSort(a, b) {
@@ -37,6 +40,7 @@ const g_data = {
 
 function initialize() {
     g_data.initialize();
+    setExtraRenameFieldsVisibility(false);
 
     if (fs.existsSync(NAME_OF_FILE_HOLDING_SETTINGS)) g_data.standardEncyDirectory = fs.readFileSync(NAME_OF_FILE_HOLDING_SETTINGS).toString();
 
@@ -126,6 +130,36 @@ document.getElementById("removeEntry").onclick = function () {
     }
 }
 
+function boolToVisibility(shouldBeVisible) {
+    return shouldBeVisible ? "visible" : "hidden";
+}
+
+function setExtraRenameFieldsVisibility(shouldBeVisible) {
+    const visibilityAsString = boolToVisibility(shouldBeVisible);
+    g_ui.renamedTerm.style.visibility = visibilityAsString;
+    g_ui.confirmRenameButton.style.visibility = visibilityAsString;
+}
+
+g_ui.toggleRenameButton.onclick = function () {
+    if (g_ui.renamedTerm.style.visibility == "hidden") {
+        setExtraRenameFieldsVisibility(true);
+        g_ui.toggleRenameButton.innerHTML = "Cancel Rename";
+    } else {
+        renamingBackToNormalMode();
+    }
+}
+
+document.getElementById("confirmRenameEntry").onclick = function () {
+    const newTerm = g_ui.renamedTerm.value;
+    if (newTerm) {
+        const oldTerm = g_ui.focusedTermLabel.textContent;
+        g_data.entries[newTerm] = g_data.entries[oldTerm];
+        delete g_data.entries[oldTerm];
+        loadTerm(newTerm);
+    }
+    renamingBackToNormalMode();
+}
+
 document.getElementById("newEncy").onclick = function () {
     saveAll();
     g_data.sourcefilenames.unshift(undefined);
@@ -151,6 +185,11 @@ document.onkeydown = function (evt) {
         saveAll();
     }
 };
+
+function renamingBackToNormalMode() {
+    setExtraRenameFieldsVisibility(false);
+    g_ui.toggleRenameButton.innerHTML = "Rename Entry";
+}
 
 function showFileNameChange() {
     updateTitle();

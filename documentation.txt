@@ -3,17 +3,21 @@
 !IMPORTANT NOTES 
 
 TIME_SPENT { after each 100: 20 min theory, 10 min explore (Kotlin?) 5 min reflect}
-...45
+...2+12=14+40=54 +20(20201005) = 74
+...45+57=102: 20 min study -> p55<start, some lessons in troubleshooting book examples> 
 ...18+127=145: 20 min study-> p53<start>, 10 min KotlinJS <study>
 ..118: 20 min study: -> p28 <start> 10 min: problems with Gradle - https://stackoverflow.com/questions/18487406/how-do-i-tell-gradle-to-use-specific-jdk-version
 83...+82+53 = 218. 20 min study -> p23, 10 tryout: need to know more about Kotlin JS 
 20200810:19:03-20:12=69 min 20200821: +114 min => 183, so 20 min study (tot p7), 10 min exp! (done; not finished yet with Kotlin. Try 3x10, then skip 3/learn KotlinJS??)
  
+The problem with the current algorithm is that when an entry is loaded anew, the 
+
 
 TODO {
   !! ALWAYS CREATE NEW BRANCH FOR FEATURE 
   
-  2. rename entry: 20/40 min !!! String.fromCharCode
+  0. Clean code, and make getElementById->querySelector, Possibly create confirmation button, and rename into cancel renaming, display:none then commit to Github. oldterm/newTerm
+  2. update to not saved when renaming item
   3. bestudeer editen: bv save not tab-targeted? 2 v 15 m 
 }
 
@@ -22,6 +26,7 @@ IMPORTANT NOTES {
     declarations: no errors are given if a constant is used before it is declared! So need separate declaration of global variables section at start...
     destructuring declarations: 
     dialogs: using sync dialogs is easier!
+    prompt: is NOT supported in Electron (on purpose) There does not seem an easy substitution.
     require("fs"); If replaced by ES6-module, does not work anymore for some reason...
     sorting:  const caseIndependentSort = (a, b) => a.toLowerCase().localeCompare(b.toLowerCase()) does not work well when combine with find... Neither does return aLower.compare(bLower);
 
