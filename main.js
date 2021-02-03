@@ -8,24 +8,38 @@ const emptyObject = {}
 const NAME_OF_FILE_HOLDING_DEFAULT_ENCY = "default_ency.txt";
 const NAME_OF_FILE_HOLDING_SETTINGS = "ency_settings.txt";
 
+// main data: 
+//  -g_ui
+//  -g_data
+// functions: 
+//  -caseIndependentSort(firstString, secondString): number => for sorting alphabetically but ignoring case 
+//  -initialize() => called on startup, loads defauly encyclopedia (if present)
+//  -errorHandler(message) : (error) -> void => small utility function, returning error-handling function
+//  -loadFile(filenameWithPath) => loads an encyclopedia
+//  *g_ui.fileSelector.onchange => handles the using selecting another encyclopedia from the 'box'
+//  -fillFileSelector() => fills the file selector element 
+//  -caseInsensitive(func): (firstString, secondString) -> func(firstString.toLowerCase(), secondString.toLowerCase()) => utility function for comparison
+//  *g_ui.removeEntryButton.onclick => handles an entry being removed.
+//  -boolToVisibility(bool): string => boolean to visibility
+//  -setExtraRenameFieldsVisibility(bool) => sets the extra rename fields 
+//  *g_ui.toggleRenameButton.onclick => handles the renaming of a term
+//  *g_ui.newEncyButton.onclick => handles the button that creates a new encyclopedia 
+//  *document.onkeydown => handles generic key presses, like escape to clear 
+
 const g_ui = {
     confirmRenameButton: document.querySelector("#confirmRenameEntry"),
-    termsField: document.querySelector('#termsList'),
     enteredTerm: document.querySelector('#termEntry'),
     descriptionArea: document.querySelector('#description'),
     focusedTermLabel: document.querySelector("#focusedTerm"),
     fileSelector: document.querySelector("#fileList"),
+    newEncyButton: document.querySelector("#newEncy"),
     numEntriesLabel: document.querySelector("#numEntries"),
+    removeEntryButton: document.querySelector("#removeEntry"),
     renamedTerm: document.querySelector("#renamedTermEntry"),
+    searchButton: document.querySelector("#goSearch"),
+    searchTerm: document.querySelector("#soughtTermEntry"),
+    termsField: document.querySelector('#termsList'),
     toggleRenameButton: document.querySelector("#renameEntry")
-}
-
-function caseIndependentSort(a, b) {
-    const aLower = a.toLocaleLowerCase();
-    const bLower = b.toLocaleLowerCase();
-    if (aLower < bLower) return -1;
-    else if (aLower == bLower) return 0;
-    else return 1;
 }
 
 const g_data = {
@@ -36,6 +50,14 @@ const g_data = {
     sortedKeys: function () { return Object.keys(this.entries).sort(caseIndependentSort) },
     sourcefilenames: [],
     standardEncyDirectory: "",
+}
+
+function caseIndependentSort(a, b) {
+    const aLower = a.toLocaleLowerCase();
+    const bLower = b.toLocaleLowerCase();
+    if (aLower < bLower) return -1;
+    else if (aLower == bLower) return 0;
+    else return 1;
 }
 
 function initialize() {
@@ -118,17 +140,7 @@ function caseInsensitive(f) {
 
 const KEYCODE_HOME = 36;
 
-document.getElementById("removeEntry").onclick = function () {
-    const response = confirm("Remove this entry?");
-    if (response) {
-        const termToRemove = g_ui.focusedTermLabel.textContent;
-        // try to get the term after it; if that fails (last entry) go to the previous term, else (only entry) clear the field 
-        const replacementTerm = g_data.sortedKeys().find(term => caseInsensitive(larger)(term, termToRemove)) ??
-            g_data.sortedKeys().reverse().find(term => caseInsensitive(smaller)(term, termToRemove)) ?? "";
-        loadTerm(replacementTerm);
-        delete g_data.entries[termToRemove];
-    }
-}
+
 
 function boolToVisibility(shouldBeVisible) {
     return shouldBeVisible ? "visible" : "hidden";
@@ -149,7 +161,11 @@ g_ui.toggleRenameButton.onclick = function () {
     }
 }
 
-document.getElementById("confirmRenameEntry").onclick = function () {
+g_ui.searchButton.onclick = function () {
+
+}
+
+g_ui.confirmRenameButton.onclick = function () {
     const newTerm = g_ui.renamedTerm.value;
     if (newTerm) {
         const oldTerm = g_ui.focusedTermLabel.textContent;
@@ -160,7 +176,7 @@ document.getElementById("confirmRenameEntry").onclick = function () {
     renamingBackToNormalMode();
 }
 
-document.getElementById("newEncy").onclick = function () {
+g_ui.newEncyButton.onclick = function () {
     saveAll();
     g_data.sourcefilenames.unshift(undefined);
     g_data.entries = {};
@@ -322,6 +338,12 @@ let saveOptions = { title: "Save Encyclopedia", buttonLabel: "Save File", ...bas
 
 let loadOptions = { title: "Load Encyclopedia", buttonLabel: "Load File", ...baseOptions };
 
+let deleteContentsOptions = {
+    title: "Delete term?",
+    buttons: ["Yes", "Cancel"],
+    message: "Do you really want to delete this term?"
+}
+
 function saveAll() {
     if (!g_data.nameOfCurrentFile()) { // get rid of undefined start 
         g_data.sourcefilenames[0] = (dialog.showSaveDialogSync(WIN, saveOptions));
@@ -405,5 +427,19 @@ document.getElementById("loadEncy").onclick = function () {
 function updateStandardEncyDirectory() {
     g_data.standardEncyDirectory = path.dirname(g_data.sourcefilenames[0]);
     fs.writeFile(NAME_OF_FILE_HOLDING_SETTINGS, g_data.standardEncyDirectory, errorHandler("saveAll error: cannot write to configuration file"));
+}
+
+g_ui.removeEntryButton.onclick = function () {
+    dialog.showMessageBox(WIN, deleteContentsOptions).then(result => {
+        if (result.response === 0) {
+            const termToRemove = g_ui.focusedTermLabel.textContent;
+            // try to get the term after it; if that fails (last entry) go to the previous term, else (only entry) clear the field 
+            const replacementTerm = g_data.sortedKeys().find(term => caseInsensitive(larger)(term, termToRemove)) ??
+                g_data.sortedKeys().reverse().find(term => caseInsensitive(smaller)(term, termToRemove)) ?? "";
+            delete g_data.entries[termToRemove];
+            loadTerm(replacementTerm);
+        }
+    }
+    );
 }
 
