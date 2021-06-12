@@ -13,8 +13,17 @@ TIME_SPENT { after each 100: 20 min theory, 10 min explore (Kotlin?) 5 min refle
 The problem with the current algorithm is that when an entry is loaded anew, the 
 
 
-TODO {
-  !! ALWAYS CREATE NEW BRANCH FOR FEATURE 
+TODO { // NOW JS 15, then study Electron 15, then Kotlin 15, try make replacement that's less buggy
+  1. Create search box and make it work 
+    Elaborate description: when there is a letter in the search box (of number of letters), only entries that contain the (ignorecased) word as 
+    either the term or as the contents are shown in the list, reached by the next and prev buttons.
+    ALSO: all texts/words that have the ignorecased letters should be highlighted, for example in yellow.
+
+    [Round 1:]
+  2. Debug why removing entries gives problems (problem seems to be that box is not selectable anymore, must click outside main window and then inside it again...)
+     // no, HTML selection is for the select/options box, not for selecting an element by itself...
+
+
   
   0. Clean code, and make getElementById->querySelector, Possibly create confirmation button, and rename into cancel renaming, display:none then commit to Github. oldterm/newTerm
   2. update to not saved when renaming item
