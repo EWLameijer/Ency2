@@ -1,5 +1,6 @@
 "use strict"
 
+const { timeStamp } = require("console");
 const fs = require("fs");
 const path = require("path");
 
@@ -36,8 +37,7 @@ const g_ui = {
     numEntriesLabel: document.querySelector("#numEntries"),
     removeEntryButton: document.querySelector("#removeEntry"),
     renamedTerm: document.querySelector("#renamedTermEntry"),
-    searchButton: document.querySelector("#goSearch"),
-    searchTerm: document.querySelector("#soughtTermEntry"),
+    searchTermField: document.querySelector("#soughtTermEntry"),
     termsField: document.querySelector('#termsList'),
     toggleRenameButton: document.querySelector("#renameEntry")
 }
@@ -133,6 +133,7 @@ function fillFileSelector() {
 const smaller = (a, b) => a < b;
 const larger = (a, b) => a > b;
 const startsWith = (a, b) => a.startsWith(b)
+const contains = (a, b) => a.includes(b)
 
 function caseInsensitive(f) {
     return (a, b) => f(a.toLocaleLowerCase(), b.toLocaleLowerCase());
@@ -161,9 +162,6 @@ g_ui.toggleRenameButton.onclick = function () {
     }
 }
 
-g_ui.searchButton.onclick = function () {
-
-}
 
 g_ui.confirmRenameButton.onclick = function () {
     const newTerm = g_ui.renamedTerm.value;
@@ -216,7 +214,7 @@ function updateUiOnFileLoad() {
     showFileNameChange()
     g_ui.numEntriesLabel.innerHTML = Object.keys(g_data.entries).length; // may want to update this, but saving is more important!
     const keys = g_data.sortedKeys();
-    g_ui.termsField.innerText = keys.join("\n");
+    updateTermsList("")
     const firstTerm = keys[0] ?? "";
     loadTerm(firstTerm);
 }
@@ -230,6 +228,17 @@ g_ui.enteredTerm.onkeyup = function () {
 
     showNewEntry(term);
     if (keyCode === KEYCODE_ENTER) g_ui.descriptionArea.focus();
+}
+
+g_ui.searchTermField.onkeyup = function () {
+    // TODO
+    const searchTerm = g_ui.searchTermField.value;
+    const selectedTerms = g_data.sortedKeys().filter(term => caseInsensitive(contains)(term, searchTerm));
+    confirm("ello + " + selectedTerms)
+    const term = selectedTerms[0]
+    confirm("ello + " + term)
+    showNewEntry(term);
+    updateTermsList(term)
 }
 
 function quoted(text) {
@@ -383,7 +392,7 @@ function updateTitle() {
         if (originalEntries[term] !== g_data.entries[term]) modifiedSinceLastSave = true;
     }
     const modifiedPart = (modifiedSinceLastSave) ? "UNSAVED CHANGES" : "saved"
-    document.title = `Encyclopedizer 2.0 - ${fileNameToDisplay} - ${modifiedPart}`;
+    document.title = `Encyclopedizer 2.1 - ${fileNameToDisplay} - ${modifiedPart}`;
 }
 
 function loadTerm(newTerm) {
@@ -391,8 +400,52 @@ function loadTerm(newTerm) {
     showNewEntry(newTerm);
 }
 
+class TermsList {
+    constructor() {
+        this.currentTerm = "";
+        this.termsList = this.getTermsList(); // ALL terms that can be selected, given the current filter
+        this.showNextTermsList();
+    }
+
+    goToTerm(term) {
+        this.currentTerm = term;
+    }
+
+    goDown() {
+        const nextTerm = this.termsList.find(term => term.toLocaleLowerCase() > this.currentTerm.toLocaleLowerCase());
+        if (nextTerm != undefined) {
+            this.currentTerm = nextTerm;
+            this.showNextTermsList();
+        }
+    }
+
+    goUp() {
+        
+    }
+
+    showNextTermsList() {
+        g_ui.termsField.innerText = this.termsList.filter(term => term.toLocaleLowerCase() > this.currentTerm.toLocaleLowerCase()).join("\n");
+    }
+
+    getTermsList() {
+        const filter = g_ui.searchTermField.value;
+        const lowercaseFilter = filter.toLowerCase()
+        return g_data.sortedKeys().filter(term => term.toLowerCase().includes(lowercaseFilter))
+    }
+}
+
+const termsList = new TermsList();
+
+function updatesTermsList(currentTerm) {
+    const filter = g_ui.searchTermField.value;
+    const lowercaseFilter = filter.toLowerCase()
+    g_ui.termsField.innerText = g_data.sortedKeys().filter(term =>
+        (term.toLocaleLowerCase() > currentTerm.toLocaleLowerCase()) && term.toLowerCase().includes(lowercaseFilter)).
+        join("\n");
+}
+
 function showNewEntry(newTerm) {
-    g_ui.termsField.innerText = g_data.sortedKeys().filter(term => term.toLocaleLowerCase() > newTerm.toLocaleLowerCase()).join("\n");
+    updateTermsList(newTerm)
     g_ui.focusedTermLabel.innerText = newTerm;
     g_ui.descriptionArea.value = unquoted(g_data.entries[newTerm] ?? "");
     if (g_data.originalEntries[newTerm] === undefined) g_data.originalEntries[newTerm] = g_data.entries[newTerm];

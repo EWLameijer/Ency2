@@ -19,6 +19,20 @@ TODO { // NOW JS 15, then study Electron 15, then Kotlin 15, try make replacemen
     either the term or as the contents are shown in the list, reached by the next and prev buttons.
     ALSO: all texts/words that have the ignorecased letters should be highlighted, for example in yellow.
 
+    UGH... OK. Loading term works. Now also 
+    updateTermList g_ui.termsField.innerText
+    Works! 
+    Now there is lots of work where I feel resistance for. But success follows those who can overcome that resistance!
+
+    *ideally: I basically want a list in the background, based on the current filter, where I can move up and down (so up and down work properly).
+    Basically THAT is the list updated when you do that updateTermList; what is seen on the screen is only a reflection of that.
+
+    How would I do this in Kotlin? 
+    Well, I'd create a 'selectableTerms' object, which has a 'currentTerm' (word) and filter. Up and down 
+    => SEE g_ui.enteredTerm.onkeydown = function () {
+
+enteredTerm.onkeyup => 
+
     [Round 1:]
   2. Debug why removing entries gives problems (problem seems to be that box is not selectable anymore, must click outside main window and then inside it again...)
      // no, HTML selection is for the select/options box, not for selecting an element by itself...
