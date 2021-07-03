@@ -2,6 +2,9 @@
 !DONE
 !IMPORTANT NOTES 
 
+EVEN DAYS: STUDY ELECTRON(book?) ODD DAYS: halftime=study code/make notes; half time=debug 
+traditionally
+
 TIME_SPENT { after each 100: 20 min theory, 10 min explore (Kotlin?) 5 min reflect}
 ...2+12=14+40=54 +20(20201005) = 74
 ...45+57=102: 20 min study -> p55<start, some lessons in troubleshooting book examples> 
@@ -11,6 +14,7 @@ TIME_SPENT { after each 100: 20 min theory, 10 min explore (Kotlin?) 5 min refle
 20200810:19:03-20:12=69 min 20200821: +114 min => 183, so 20 min study (tot p7), 10 min exp! (done; not finished yet with Kotlin. Try 3x10, then skip 3/learn KotlinJS??)
  
 The problem with the current algorithm is that when an entry is loaded anew, the 
+
 
 
 TODO { // NOW JS 15, then study Electron 15, then Kotlin 15, try make replacement that's less buggy
@@ -29,7 +33,11 @@ TODO { // NOW JS 15, then study Electron 15, then Kotlin 15, try make replacemen
 
     How would I do this in Kotlin? 
     Well, I'd create a 'selectableTerms' object, which has a 'currentTerm' (word) and filter. Up and down 
+    
     => SEE g_ui.enteredTerm.onkeydown = function () {
+
+      Hmm... loading "Self" should give a-d. Why doesn't it?
+
 
 enteredTerm.onkeyup => 
 

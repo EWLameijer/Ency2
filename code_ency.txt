@@ -1,0 +1,35 @@
+create new encyclopedia button:
+    id=newEncy => g_ui.newEncyButton
+
+default_ency.txt
+    a file containing a list of all the paths of the encyclopedia files (like D:\Google Drive\Zakelijk\Encyclopedias\Self.txt, last-used on top)
+
+delete entry-button 
+    id=removeEntry => g_ui.removeEntryButton
+
+ency_settings.txt 
+    contains the name of the standard directory to create (or look for) encyclopedias (like D:\Google Drive\Zakelijk\Encyclopedias)
+
+files:
+    default_ency.txt * (NAME_OF_FILE_HOLDING_DEFAULT_ENCY)
+    ency_settings.txt *  (NAME_OF_FILE_HOLDING_SETTINGS)
+
+load button (UI):
+    id=loadEncy, => g_ui.loadButton
+
+loading a file: loadFile(fileNameWithPath)
+
+rename button (do NOT confuse with the rename entry-button, which is always visible. The rename button isn't)
+    id=confirmRenameEntry => g_ui.confirmRenameButton
+
+rename entry-button (not to be confused with the rename button, which only shows AFTER rename-entry is pressed)
+    id=renameEntry, => g_ui.toggleRenameButton
+
+rename: textfield
+    id=renamedTermEntry => g_ui.renamedTerm
+
+save button (UI):
+    id=save => g_ui.saveButton 
+
+
+

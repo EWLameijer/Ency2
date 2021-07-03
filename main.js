@@ -1,6 +1,5 @@
 "use strict"
 
-const { timeStamp } = require("console");
 const fs = require("fs");
 const path = require("path");
 
@@ -33,10 +32,12 @@ const g_ui = {
     descriptionArea: document.querySelector('#description'),
     focusedTermLabel: document.querySelector("#focusedTerm"),
     fileSelector: document.querySelector("#fileList"),
+    loadButton: document.querySelector("#loadEncy"),
     newEncyButton: document.querySelector("#newEncy"),
     numEntriesLabel: document.querySelector("#numEntries"),
     removeEntryButton: document.querySelector("#removeEntry"),
     renamedTerm: document.querySelector("#renamedTermEntry"),
+    saveButton: document.querySelector("#save"),
     searchTermField: document.querySelector("#soughtTermEntry"),
     termsField: document.querySelector('#termsList'),
     toggleRenameButton: document.querySelector("#renameEntry")
@@ -85,6 +86,55 @@ function initialize() {
 }
 
 initialize();
+
+class TermsList {
+    constructor(dataSource, listOutputField) {
+        this.dataSource = dataSource;
+        this.listOutputField = listOutputField;
+        this.reset();
+    }
+
+    reset() {
+        this.currentTerm = "";
+        this.termsList = this.getTermsList(); // ALL terms that can be selected, given the current filter
+        this.showNextTermsList();
+    }
+
+    goToTerm(term) {
+        this.currentTerm = term;
+    }
+
+    goDown() {
+        const nextTerm = this.termsList.find(term => caseInsensitive(larger)(term, this.currentTerm));
+        if (nextTerm != undefined) {
+            this.currentTerm = nextTerm;
+            this.showNextTermsList();
+            loadTerm(nextTerm);
+        }
+    }
+
+    goUp() {
+        const previousTerm = this.termsList.reverse().find(term => caseInsensitive(smaller)(term, this.currentTerm));
+        if (previousTerm != undefined) { // TODO DUPLICATE
+            this.currentTerm = previousTerm;
+            this.showNextTermsList();
+            loadTerm(previousTerm);
+        }
+        
+    }
+
+    showNextTermsList() {
+        this.listOutputField.innerText = this.termsList.filter(term => term.toLocaleLowerCase() > this.currentTerm.toLocaleLowerCase()).join("\n");
+    }
+
+    getTermsList() {
+        const filter = g_ui.searchTermField.value;
+        const lowercaseFilter = filter.toLowerCase()
+        return this.dataSource.sortedKeys().filter(term => term.toLowerCase().includes(lowercaseFilter))
+    }
+}
+
+const termsList = new TermsList(g_data, g_ui.termsField);
 
 function errorHandler(message) {
     return (err) => {
@@ -211,12 +261,16 @@ function showFileNameChange() {
 }
 
 function updateUiOnFileLoad() {
+   
     showFileNameChange()
-    g_ui.numEntriesLabel.innerHTML = Object.keys(g_data.entries).length; // may want to update this, but saving is more important!
-    const keys = g_data.sortedKeys();
-    updateTermsList("")
+    g_ui.numEntriesLabel.innerHTML = Object.keys(g_data.entries).length + g_data.sortedKeys(); // may want to update this, but saving is more important!
+    
+     const keys = g_data.sortedKeys();
+    // TODO works until here!
+    termsList.reset();
     const firstTerm = keys[0] ?? "";
     loadTerm(firstTerm);
+    //prompt("DONEupdatingUI")
 }
 
 g_ui.enteredTerm.onkeyup = function () {
@@ -238,7 +292,6 @@ g_ui.searchTermField.onkeyup = function () {
     const term = selectedTerms[0]
     confirm("ello + " + term)
     showNewEntry(term);
-    updateTermsList(term)
 }
 
 function quoted(text) {
@@ -353,6 +406,8 @@ let deleteContentsOptions = {
     message: "Do you really want to delete this term?"
 }
 
+
+
 function saveAll() {
     if (!g_data.nameOfCurrentFile()) { // get rid of undefined start 
         g_data.sourcefilenames[0] = (dialog.showSaveDialogSync(WIN, saveOptions));
@@ -369,6 +424,8 @@ function saveAll() {
     g_data.originalEntries = { [currentTerm]: g_data.entries[currentTerm] };
     updateTitle();
 }
+
+g_ui.saveButton.onclick = saveAll
 
 g_ui.enteredTerm.onkeydown = function () {
     const keyCode = window.event.keyCode;
@@ -400,52 +457,9 @@ function loadTerm(newTerm) {
     showNewEntry(newTerm);
 }
 
-class TermsList {
-    constructor() {
-        this.currentTerm = "";
-        this.termsList = this.getTermsList(); // ALL terms that can be selected, given the current filter
-        this.showNextTermsList();
-    }
-
-    goToTerm(term) {
-        this.currentTerm = term;
-    }
-
-    goDown() {
-        const nextTerm = this.termsList.find(term => term.toLocaleLowerCase() > this.currentTerm.toLocaleLowerCase());
-        if (nextTerm != undefined) {
-            this.currentTerm = nextTerm;
-            this.showNextTermsList();
-        }
-    }
-
-    goUp() {
-        
-    }
-
-    showNextTermsList() {
-        g_ui.termsField.innerText = this.termsList.filter(term => term.toLocaleLowerCase() > this.currentTerm.toLocaleLowerCase()).join("\n");
-    }
-
-    getTermsList() {
-        const filter = g_ui.searchTermField.value;
-        const lowercaseFilter = filter.toLowerCase()
-        return g_data.sortedKeys().filter(term => term.toLowerCase().includes(lowercaseFilter))
-    }
-}
-
-const termsList = new TermsList();
-
-function updatesTermsList(currentTerm) {
-    const filter = g_ui.searchTermField.value;
-    const lowercaseFilter = filter.toLowerCase()
-    g_ui.termsField.innerText = g_data.sortedKeys().filter(term =>
-        (term.toLocaleLowerCase() > currentTerm.toLocaleLowerCase()) && term.toLowerCase().includes(lowercaseFilter)).
-        join("\n");
-}
 
 function showNewEntry(newTerm) {
-    updateTermsList(newTerm)
+    termsList.goToTerm(newTerm);
     g_ui.focusedTermLabel.innerText = newTerm;
     g_ui.descriptionArea.value = unquoted(g_data.entries[newTerm] ?? "");
     if (g_data.originalEntries[newTerm] === undefined) g_data.originalEntries[newTerm] = g_data.entries[newTerm];
@@ -469,7 +483,7 @@ function isEscapingBackslash(index, text) {
     return (index < text.length - 1) && (text[index] === '\\') && (text[index + 1] === '"' || text[index + 1] === '\\');
 }
 
-document.getElementById("loadEncy").onclick = function () {
+g_ui.loadButton.onclick = function () {
     let newFilename = dialog.showOpenDialogSync(WIN, loadOptions);
     if (newFilename) {
         loadFile(newFilename[0]);

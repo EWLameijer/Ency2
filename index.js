@@ -22,18 +22,23 @@
 
 const { app, BrowserWindow } = require('electron')
 
-function createWindow () {
-  // Create the browser window.
-  const win = new BrowserWindow({
+//app.whenReady().then(createWindow)
+
+app.on('ready', () => {
+  let mainWindow =  new BrowserWindow({
     width: 1600,
     height: 800,
+    show: false,
     webPreferences: {
       nodeIntegration: true
     }
-  })
+  });
+  mainWindow.loadFile('index.html');
+  mainWindow.once('ready-to-show', () => {
+    mainWindow.show();
+  });
 
-  // and load the index.html of the app.
-  win.loadFile('index.html')
-}
-
-app.whenReady().then(createWindow)
+  mainWindow.on('closed', () => {
+    mainWindow = null;
+  });
+});
